@@ -1,11 +1,14 @@
-set(PROJECT_NAME net)
-
 set(SERVER_EXAMPLE_SRC "server.cpp")
 set(CLIENT_EXAMPLE_SRC "client.cpp")
 
-add_executable(${PROJECT_NAME}-server ${SERVER_EXAMPLE_SRC})
-target_include_directories(${PROJECT_NAME}-server PUBLIC "${CMAKE_SOURCE_DIR}/source")
+set(TARGET ${PROJECT_NAME}-server)
+add_executable(${TARGET} ${SERVER_EXAMPLE_SRC})
+target_link_libraries(${TARGET} net)
+target_link_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/include/lib")
+target_include_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/include")
 
-
-add_executable(${PROJECT_NAME}-client ${CLIENT_EXAMPLE_SRC})
-target_include_directories(${PROJECT_NAME}-client PUBLIC "${CMAKE_SOURCE_DIR}/source")
+set(TARGET ${PROJECT_NAME}-client)
+add_executable(${TARGET} ${CLIENT_EXAMPLE_SRC})
+target_link_libraries(${TARGET} net)
+target_link_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/include/lib")
+target_include_directories(${TARGET} PUBLIC "${CMAKE_SOURCE_DIR}/include")

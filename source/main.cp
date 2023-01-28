@@ -1,8 +1,5 @@
-//#include "net.hpp"
-#include "win32/net_server.hpp"
-#include "win32/net_client.hpp"
-#include "win32/client_socket.hpp"
-#include "win32/net_connection.hpp"
+#include "net.hpp"
+
 
 #include <iostream>
 #include <array>

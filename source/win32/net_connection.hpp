@@ -2,7 +2,7 @@
 #define _NET_CONNECTION_HPP_
 
 #include "win32_definitions.hpp"
-#include "socket_context.hpp"
+#include "socket_definition.hpp"
 #include "net_client.hpp"
 
 namespace net

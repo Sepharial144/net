@@ -1,11 +1,14 @@
-#ifndef _SOCKET_CONTEXT_HPP_
-#define _SOCKET_CONTEXT_HPP_
+#ifndef _SOCKET_DEFINITION_HPP_
+#define _SOCKET_DEFINITION_HPP_
 
-#include "win32/win32_definitions.hpp"
+#include "common/common.hpp"
 
 #if defined(_WIN32) && !defined(__linux__)
 
-//#include "win32/win32_definitions.hpp"
+#include "win32/win32_definitions.hpp"
+#include "win32/net_server.hpp"
+#include "win32/net_client.hpp"
+#include "win32/net_connection.hpp"
 
 #elif defined(__linux__) && !defined(_WIN32)
 
@@ -115,4 +118,4 @@ namespace net {
 } // !namespace net
 
 
-#endif // !_SOCKET_CONTEXT_HPP_
+#endif // !_SOCKET_DEFINITION_HPP_
