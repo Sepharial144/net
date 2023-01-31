@@ -13,9 +13,9 @@
 	#include <ws2tcpip.h>
 	#include <iostream>
 
-	//#pragma comment (lib, "Ws2_32.lib")
-	//#pragma comment (lib, "Mswsock.lib")
-	//#pragma comment (lib, "AdvApi32.lib")
+	#pragma comment (lib, "Ws2_32.lib")
+	#pragma comment (lib, "Mswsock.lib")
+	#pragma comment (lib, "AdvApi32.lib")
 #endif
 
 #endif // !_WIN_SOCKET_DEFINITIONS_HPP_

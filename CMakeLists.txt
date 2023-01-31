@@ -26,10 +26,14 @@ if(WIN32)
 elseif(Linux)
 endif()
 
+
 file(GLOB_RECURSE HDR_FILES "source/*.hpp")
 file(GLOB_RECURSE SRC_FILES "source/*.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${HDR_FILES} ${SRC_FILES})
+set_target_properties(${PROJECT_NAME} 
+    PROPERTIES 
+    PUBLIC_HEADER "source/net.hpp")
 
 target_link_libraries(${PROJECT_NAME} ${LIB_DEPENDENCIES})
 target_include_directories(${PROJECT_NAME} PRIVATE "source")
@@ -37,13 +41,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE "source")
 #add_subdirectory(examples)
 #add_subdirectory(tests)
 
+# TODO: finish configure project
 install(TARGETS ${PROJECT_NAME}
         CONFIGURATIONS Debug
-        LIBRARY DESTINATION "include/release/net")
+        LIBRARY DESTINATION  "net/debug/"
+        PUBLIC_HEADER DESTINATION "net/debug/")
 install(TARGETS ${PROJECT_NAME}
         CONFIGURATIONS Release
-        LIBRARY DESTINATION  "include/debug/net")
+        LIBRARY DESTINATION "net/release"
+        PUBLIC_HEADER DESTINATION "net/release")
 
 install(FILES ${IFC_FILES}
-       DESTINATION "include/debug/net"
+       DESTINATION ${CMAKE_INSTALL_PREFIX}
 )
