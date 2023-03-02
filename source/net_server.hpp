@@ -1,16 +1,14 @@
 #ifndef _NET_SERVER_HPP_
 #define _NET_SERVER_HPP_
 
-#include "win32_definitions.hpp"
-#include "socket_definition.hpp"
 #include "net_client.hpp"
+#include "BasicSocket.hpp"
 
 namespace net
 {
-	class server
+	class server: public BasicSocket
 	{
 	public:
-		explicit server();
 		explicit server(const char* addr, const char* port);
 		~server();
 
@@ -18,12 +16,9 @@ namespace net
 		int32_t waitConnection(client& client);
 
 	private:
-		WSADATA m_wsaData;
-		SOCKET m_socket;
-		SOCKET m_clientSocket;
-		const char* m_address;
-		const char* m_defaultPort;
-		sockaddr_in m_serverSettings;
+		const char* m_address = nullptr;
+		const char* m_defaultPort = nullptr;
+		sockaddr_in m_serverSettings = {0};
 	};
 } // ! namespace net
 

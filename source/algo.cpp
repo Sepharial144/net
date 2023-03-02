@@ -1,19 +1,20 @@
-#include "common.hpp"
+#include "algo.hpp"
 
 #include <math.h>
 #include <cstdint>
 
 namespace net
 {
-    namespace common {
+    namespace algo {
         // TODO: improve rank for another numbers not ranked - 1025 for example
         // which mean that 1024 - 2^10 and 2^0 which
-        constexpr size_t getRank(size_t num)
+        size_t getRank(size_t num)
         {
             double result = 0.0f;
             double value = 0.0f;
             while (num != static_cast<size_t>(result))
             {
+                // TODO: change pow to bit shift
                 result = pow(2ul, value);
                 ++value;
             }
@@ -50,5 +51,5 @@ namespace net
             return carriage;
         }
 
-    } // !namespace common
+    } // !namespace algo
 } // !namespace net
