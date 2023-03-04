@@ -2,19 +2,16 @@
 #define _SOCKET_DEFINITION_HPP_
 
 #include "algo.hpp"
-#include "net_server.hpp"
-#include "net_client.hpp"
-#include "net_connection.hpp"
 
-//#if defined(_WIN32) && !defined(__linux__)
+#if defined(_WIN32) && !defined(__linux__)
 
-//#include "win32_definitions.hpp"
+#include "win32_definitions.hpp"
 
-//#elif defined(__linux__) && !defined(_WIN32)
+#elif defined(linux) && !defined(_WIN32)
 
-//#include "../socket/linux/linux_definitions.h"
+#include "linux_definitions.h"
 
-//#endif
+#endif
 
 #include <cstdint>
 

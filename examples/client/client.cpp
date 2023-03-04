@@ -1,9 +1,8 @@
 #include "net.hpp"
+#include "net_connection.hpp"
 
 #include <iostream>
 #include <array>
-
-using namespace net;
 
 int main()
 {
@@ -13,7 +12,7 @@ int main()
     std::array<char, 1024> request;
     std::string message = "Super message";
 
-    net::socket::connection client(address, port);
+    net::connection client(address, port);
 
     if (client.connect())
     {
@@ -29,12 +28,12 @@ int main()
             if (requestLen > 0)
             {
                 std::cout << "Request len: " << requestLen << std::endl;
-                size_t rank = common::getRank(request.size());
-                std::cout << "Rank: " << rank << std::endl;
-                size_t lenMessage = common::findLastReadableLetter(request.data(), request.size(), rank);
-                std::cout << "Len message: " << request.data() << "| " << lenMessage << std::endl;
-                uint8_t letter = *(request.data() + lenMessage);
-                std::cout << "Symbol: " << (uint16_t)letter << std::endl;
+                //size_t rank = common::getRank(request.size());
+                //std::cout << "Rank: " << rank << std::endl;
+                //size_t lenMessage = common::findLastReadableLetter(request.data(), request.size(), rank);
+                //std::cout << "Len message: " << request.data() << "| " << lenMessage << std::endl;
+                //uint8_t letter = *(request.data() + lenMessage);
+                //std::cout << "Symbol: " << (uint16_t)letter << std::endl;
                 std::cout << "Symbol2: " << (uint8_t)126 << std::endl;
                 break;
             }

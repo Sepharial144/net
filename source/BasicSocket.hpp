@@ -1,16 +1,7 @@
 #ifndef _NET_BASIC_SOCKET_HPP_
 #define _NET_BASIC_SOCKET_HPP_
 
-
-#if defined(_WIN32) && !defined(__linux__)
-
-#include "win32_definitions.hpp"
-
-#elif defined(__linux__) && !defined(_WIN32)
-
-#include "linux_definitions.h"
-
-#endif
+#include "socket_definition.hpp"
 
 namespace net
 {
@@ -18,18 +9,22 @@ namespace net
 	{
 	public:
 		explicit BasicSocket();
-		explicit BasicSocket(const size_t bits);
-		~BasicSocket();
-
+		explicit BasicSocket(int32_t net_param, int32_t sock_type, int32_t connection_type);
+		virtual ~BasicSocket();
 		void close();
 
-	protected:
-		SOCKET& socketReference();
+		SOCKET getSocket() const;
+		int32_t send(const char* data, size_t len);
+		int32_t recieve(char* data, size_t len);
+		size_t sendFrame(const char* data, size_t len);
+
+	private:
+		void initWSA();
 
 	private:
 		WSADATA m_wsaData = {0};
 		SOCKET m_socket = { INVALID_SOCKET };
-		size_t m_bitsCount = {0};
+		size_t m_lenMessage = { 0UL };
 	};
 } // ! namespace net
 

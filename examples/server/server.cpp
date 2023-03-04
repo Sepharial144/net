@@ -1,4 +1,5 @@
 #include "net.hpp"
+#include "ThirdParty/net/win32/net_client.hpp"
 
 #include <iostream>
 #include <array>

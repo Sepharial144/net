@@ -4,7 +4,7 @@
 // common includes
 #include <cassert>
 
-#if defined(_WIN32) && !defined(__linux__)
+#if defined(_WIN32) && !defined(linux)
 	// windows
 
 	#define WIN32_LEAN_AND_MEAN

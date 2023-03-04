@@ -2,11 +2,11 @@
 #define _NET_CLIENT_HPP_
 
 #include "BasicSocket.hpp"
-#include "socket_definition.hpp"
+
 
 namespace net
 {
-	class client
+	class client: public BasicSocket
 	{
 	private:
 		friend class server;
@@ -16,15 +16,10 @@ namespace net
 		explicit client(size_t len_message);
 		~client();
 
-		void close();
-
-		int32_t send(const char* data, size_t len);
-		size_t sendFrame(const char* data, size_t len);
-		int32_t recieve(char* data, size_t len);
+	private:
+		SOCKET getSocket();
 
 	private:
-		WSADATA m_wsaData;
-		SOCKET m_socket;
 		size_t m_lenMessage;
 	};
 } // ! namespace net

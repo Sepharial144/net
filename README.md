@@ -12,3 +12,16 @@ cmake --build build --config Debug
 cmake --build build --config Release
 
 cmake --isntall .\build --prefix "include"
+
+
+
+# Windows compilation
+cmake . -Bbuild -G "Visual Studio 17 2022"
+
+# build debug mode
+cmake --build build --config Debug
+
+# build release mode
+cmake --build build --config Release
+
+cmake --install build --config Debug --prefix "include"

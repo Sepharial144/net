@@ -2,14 +2,14 @@
 #define _NET_SERVER_HPP_
 
 #include "net_client.hpp"
-#include "BasicSocket.hpp"
+
 
 namespace net
 {
 	class server: public BasicSocket
 	{
 	public:
-		explicit server(const char* addr, const char* port);
+		explicit server(const char* addr, int32_t port);
 		~server();
 
 		void listening();
@@ -17,7 +17,7 @@ namespace net
 
 	private:
 		const char* m_address = nullptr;
-		const char* m_defaultPort = nullptr;
+		int32_t m_defaultPort = {0};
 		sockaddr_in m_serverSettings = {0};
 	};
 } // ! namespace net

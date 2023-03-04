@@ -3,61 +3,61 @@
 
 namespace net
 {
-	server::server(const char* addr, const char* port)
-		:m_address{ addr },
+	server::server(const char* addr, int32_t port)
+		:BasicSocket{ AF_INET, SOCK_STREAM, IPPROTO_TCP },
+		 m_address{ addr },
 		 m_defaultPort{ port }
 	{
-		SOCKET& socket = socketReference();
-		socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		if (socket == INVALID_SOCKET)
-		{
-			printf("Server: Error at socket(): %ld\n", WSAGetLastError());
-			WSACleanup();
-		}
-		else
-			printf("Server: socket() is OK.\n");
-
 		m_serverSettings.sin_family = AF_INET;
 		m_serverSettings.sin_addr.s_addr = inet_addr(m_address);
 		// TODO: need to traslate number of port
-		m_serverSettings.sin_port = htons(3000);
+		m_serverSettings.sin_port = htons(port);
 	}
+
 
 	server::~server()
 	{
+		close();
 	}
+
 
 	void server::listening()
 	{
-		SOCKET& socket = socketReference();
-		if (::bind(socket, (SOCKADDR*)&m_serverSettings, sizeof(sockaddr_in)) == SOCKET_ERROR)
+		std::cout << "Server bind ..." << &std::endl;
+		if (::bind(getSocket(), (SOCKADDR*)&m_serverSettings, sizeof(sockaddr_in)) == SOCKET_ERROR)
 		{
-			printf("Server: bind() failed.\n");
+			std::cout << "Server bind ... failed" << WSAGetLastError() << &std::endl;
+			return;
 		}
-		else
-			printf("Server: bind() is OK.\n");
+		std::cout << "Server bind ... complete" << &std::endl;
 
+		// TODO: create mehcanizm for max connections
 		int32_t countConnections = 10;
-		if (::listen(socket, countConnections) == SOCKET_ERROR)
+		std::cout << "Server set connections ... " << countConnections << &std::endl;
+		std::cout << "Server listening ... " << &std::endl;
+		if (::listen(getSocket(), countConnections) == SOCKET_ERROR)
 		{
-			printf("Server: Error listening on socket.\n");
+			std::cout << "Server listening ... error" << WSAGetLastError() << &std::endl;
+			return;
 		}
-		else
-			printf("Server: listen() is OK.\n");
+
+		std::cout << "Server listening ... complete" << WSAGetLastError() << &std::endl;
 	}
 
 	int32_t server::waitConnection(net::client& client)
 	{
 		listening();
-		SOCKET& socket = socketReference();
-		client.m_socket = SOCKET_ERROR;
-		while (client.m_socket == SOCKET_ERROR)
+		std::cout << "Server wait connection ... " << WSAGetLastError() << &std::endl;
+		SOCKET sock = client.getSocket();
+		// TODO: create exception when socket is not error;
+		sock = SOCKET_ERROR;
+		while (sock == SOCKET_ERROR)
 		{
-			client.m_socket = accept(socket, nullptr, nullptr);
+			sock = accept(getSocket(), nullptr, nullptr);
 		}
-		if (client.m_socket == SOCKET_ERROR)
+		if (sock == SOCKET_ERROR)
 		{
-			std::cout << "Socket error: " << std::endl;
+			std::cout << "Socket error: " << &std::endl;
 			return 0;
 		}
 		return 1;
