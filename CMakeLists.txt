@@ -42,22 +42,27 @@ set_target_properties(${PROJECT_NAME}
     PUBLIC_HEADER "${HDR_FILES}")
 
 target_link_libraries(${PROJECT_NAME} ${LIB_DEPENDENCIES})
-target_include_directories(${PROJECT_NAME} PRIVATE "source")
+
+set(NET_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source" "${CMAKE_CURRENT_SOURCE_DIR}/source/win32")
+target_include_directories(${PROJECT_NAME} PRIVATE ${NET_INCLUDE_DIR})
+
+message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 #add_subdirectory("examples/client")
 #add_subdirectory(tests)
 
+add_subdirectory("examples/client")
+add_subdirectory("examples/server")
+
 # TODO: finish configure project
-# library install in wrong folder
+# fix execution install folder, does not work
 install(TARGETS ${PROJECT_NAME}
         CONFIGURATIONS Debug
         ARCHIVE DESTINATION "debug/net/lib"
-        PUBLIC_HEADER DESTINATION "debug/net/")
+        RUNTIME DESTINATION "debug/net/bin"
+        PUBLIC_HEADER DESTINATION "debug/net")
 install(TARGETS ${PROJECT_NAME}
         CONFIGURATIONS Release
-        LIBRARY DESTINATION "release/net"
+        ARCHIVE DESTINATION "release/net/lib"
+        RUNTIME DESTINATION "release/net/bin"
         PUBLIC_HEADER DESTINATION "release/net")
-
-#install(FILES ${IFC_FILES}
-#       DESTINATION ${CMAKE_INSTALL_PREFIX}
-#)

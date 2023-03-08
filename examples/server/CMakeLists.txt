@@ -1,12 +1,14 @@
-cmake_minimum_required (VERSION 3.23)
-
-project(net VERSION 0.64 LANGUAGES CXX)
-
+message(STATUS "Server sources: ${SOURCE_DEPENDENCIES}")
 set(TARGET ${PROJECT_NAME}-server)
 
-set(SERVER_EXAMPLE_SRC "server.cpp")
-add_executable(${TARGET} ${SERVER_EXAMPLE_SRC})
+set(DESTINATION_LIB "${CMAKE_INSTALL_PREFIX}/${CMAKE_BUILD_TYPE}")
 
-target_link_libraries(${TARGET} PRIVATE net)
-target_include_directories(${TARGET} PUBLIC "../../include/debug/net/lib")
-target_link_directories(${TARGET} PUBLIC "../../include/debug")
+message(STATUS "Configure ${TARGET}")
+message(STATUS "Path: ${DESTINATION_LIB}")
+message(STATUS "Include dir: ${NET_INCLUDE_DIR}")
+
+set(SERVER_EXAMPLE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/server.cpp")
+add_executable(${TARGET} ${SOURCE_DEPENDENCIES} ${SERVER_EXAMPLE_SRC})
+target_include_directories(${TARGET} PUBLIC "${DESTINATION_LIB}" "${NET_INCLUDE_DIR}")
+#target_link_directories(${TARGET} PUBLIC "${DESTINATION_LIB}/lib")
+#target_link_libraries(${TARGET} PUBLIC net)

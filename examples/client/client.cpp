@@ -7,7 +7,7 @@
 int main()
 {
     const char* address = "127.0.0.1";
-    const char* port = "3000";
+    int32_t port = 3000;
 
     std::array<char, 1024> request;
     std::string message = "Super message";
@@ -24,7 +24,7 @@ int main()
         int32_t requestLen = SOCKET_ERROR;
         while (requestLen == SOCKET_ERROR)
         {
-            requestLen = client.read(request.data(), request.size());
+            requestLen = client.recieve(request.data(), request.size());
             if (requestLen > 0)
             {
                 std::cout << "Request len: " << requestLen << std::endl;
