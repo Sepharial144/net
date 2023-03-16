@@ -1,16 +1,17 @@
 #include "net.hpp"
-#include "net_connection.hpp"
 
 #include <iostream>
 #include <array>
+#include <cstdint>
 
 int main()
 {
     const char* address = "127.0.0.1";
-    int32_t port = 3000;
+    const char* port = "3000";
 
-    std::array<char, 1024> request;
-    std::string message = "Super message";
+    constexpr size_t defaultLen = 1024ul;
+    std::array<char, defaultLen> request = {0};
+    std::string message = "Echo message";
 
     net::connection client(address, port);
 
@@ -19,39 +20,25 @@ int main()
         size_t len = message.size();
         int32_t status = client.send(message.data(), message.size());
 
-        std::cout << "Message sent len: " << len << " status: " << status << std::endl;
+        std::cout << "Message sent len: " << len << " status: " << status << &std::endl;
+        std::cout << "Message sent: " << message.data() << &std::endl;
 
-        int32_t requestLen = SOCKET_ERROR;
-        while (requestLen == SOCKET_ERROR)
+        int32_t requestLen = 0;
+        while (requestLen != SOCKET_ERROR)
         {
             requestLen = client.recieve(request.data(), request.size());
             if (requestLen > 0)
             {
-                std::cout << "Request len: " << requestLen << std::endl;
-                //size_t rank = common::getRank(request.size());
-                //std::cout << "Rank: " << rank << std::endl;
-                //size_t lenMessage = common::findLastReadableLetter(request.data(), request.size(), rank);
-                //std::cout << "Len message: " << request.data() << "| " << lenMessage << std::endl;
-                //uint8_t letter = *(request.data() + lenMessage);
-                //std::cout << "Symbol: " << (uint16_t)letter << std::endl;
-                std::cout << "Symbol2: " << (uint8_t)126 << std::endl;
-                break;
+                std::cout << "Request len: " << requestLen << &std::endl;
+                std::cout << "Request: " << request.data() << &std::endl;
             }
             if (requestLen == 0 || requestLen == WSAECONNRESET)
             {
-                printf("Client: Connection Closed.\n");
+                std::cout << "Client: connection reset." << std::endl;
                 break;
             }
-            else
-                printf("Client: recv() is OK.\n");
-            if (requestLen < 0)
-            {
-                std::cout << "Bad request len: " << requestLen << std::endl;
-                break;
-            }
-            else
-                printf("Client: Bytes received - %ld.\n", requestLen);
-
+            if (requestLen == SOCKET_ERROR)
+                std::cout << "Client: connection closed." << std::endl;
         }
     }
 

@@ -1,6 +1,4 @@
 #include "net.hpp"
-#include "net_client.hpp"
-#include "net_server.hpp"
 
 #include <iostream>
 #include <array>
@@ -13,34 +11,34 @@ int main()
     const char* address = "127.0.0.1";
     const char* port = "3000";
 
-    net::server server(address, port, 1024ul);
+    constexpr size_t messageSize = 1024ul;
+    std::array<char, messageSize> request = { 0 };
+    net::server server(address, port, messageSize);
 
-    size_t messageSize = 1024ul;
     net::client client(messageSize);
 
-    std::cout << "Wait connection... " << address << ":" << port << std::endl;
+    std::cout << "Client size: " << sizeof(client) << &std::endl;
+    std::cout << "Wait connection... " << address << ":" << port << &std::endl;
     int32_t status = server.waitConnection(client);
 
-    std::cout << "Connected! " << status << std::endl;
+    std::cout << "Connected! " << status << &std::endl;
 
-    std::array<char, 1024> request;
-    while (true)
+    int32_t len = 0;
+
+    do
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        int32_t len = client.recieve(request.data(), 1024ul);
-        if (len != SOCKET_ERROR)
+        std::cout << "Do: " << request.data() << &std::endl;
+        len = client.recieve(request.data(), messageSize);
+        if (len > 0)
         {
-            std::cout << "Check message! status: " << len << " size: " << request.size() << std::endl;
+            std::cout << "Message received: " << request.data() << &std::endl;
+            std::cout << "Message len: " << len << " " << request.size() << &std::endl;
             status = client.send(request.data(), request.size());
             if (status == request.size())
-                std::cout << "Message sent : " << request.data() << std::endl;
-            break;
+                std::cout << "Message sent : " << request.data() << &std::endl;
         }
-        else
-        {
-            std::cout << "status: " << SOCKET_ERROR << std::endl;
-        }
-    }
+
+    } while(len > 0);
     std::cout << "Disconnect!" << std::endl;
 
     system("PAUSE");
