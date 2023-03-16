@@ -4,26 +4,42 @@ project(net VERSION 0.64 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-if(TARGET_OS STREQUAL "Win32")
-    message("Target os: ${TARGET_OS}")
+file(GLOB_RECURSE HDR_FILES "source/*.hpp")
+file(GLOB_RECURSE SRC_FILES "source/*.cpp")
 
-    find_library(WSOCK32_LIBRARY wsock32.lib)
-    find_library(WS2_32_LIBRARY ws2_32.lib)
-    find_library(ADVAPI32_LIBRARY AdvApi32.lib)
+if(WIN32)
+    message(STATUS "Target os: win32")
 
-    message(STATUS "Library: ${WSOCK32_LIBRARY}" )
+    #find_library(WSOCK32_LIBRARY wsock32.lib)
+    #find_library(WS2_32_LIBRARY ws2_32.lib)
+    #find_library(ADVAPI32_LIBRARY AdvApi32.lib)
+
+    #message(STATUS "Library: ${WSOCK32_LIBRARY} ${WS2_32_LIBRARY} ${ADVAPI32_LIBRARY}" )
 
     set(LIB_DEPENDENCIES 
 	    ${WSOCK32_LIBRARY} 
 	    ${WS2_32_LIBRARY} 
 	    ${ADVAPI32_LIBRARY}
     )
+
+    list(FILTER HDR_FILES EXCLUDE REGEX ".linux")
+    list(FILTER SRC_FILES EXCLUDE REGEX ".linux")
+
+    set(NET_INCLUDE_DIR 
+        "${CMAKE_CURRENT_SOURCE_DIR}/source" 
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/win32"
+    )
 else()
+    message(STATUS "Target os: linux")
+
+    list(FILTER HDR_FILES EXCLUDE REGEX ".win32")
+    list(FILTER SRC_FILES EXCLUDE REGEX ".win32")
+
+    set(NET_INCLUDE_DIR 
+        "${CMAKE_CURRENT_SOURCE_DIR}/source" 
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/linux"
+    )
 endif()
-
-
-file(GLOB_RECURSE HDR_FILES "source/*.hpp")
-file(GLOB_RECURSE SRC_FILES "source/*.cpp")
 
 set(SOURCE_DEPENDENCIES ${HDR_FILES} ${SRC_FILES})
 
@@ -33,9 +49,7 @@ endif()
 
 set(LIB_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
 
-message("PATH: ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
-
-add_library(${PROJECT_NAME} STATIC ${HDR_FILES} ${SRC_FILES})
+add_library(${PROJECT_NAME} STATIC ${SOURCE_DEPENDENCIES})
 
 set_target_properties(${PROJECT_NAME} 
     PROPERTIES 
@@ -43,7 +57,6 @@ set_target_properties(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${LIB_DEPENDENCIES})
 
-set(NET_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source" "${CMAKE_CURRENT_SOURCE_DIR}/source/win32")
 target_include_directories(${PROJECT_NAME} PRIVATE ${NET_INCLUDE_DIR})
 
 message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
@@ -56,6 +69,8 @@ add_subdirectory("examples/server")
 
 # TODO: finish configure project
 # fix execution install folder, does not work
+message(STATUS "Build path: ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
 install(TARGETS ${PROJECT_NAME}
         CONFIGURATIONS Debug
         ARCHIVE DESTINATION "debug/net/lib"
