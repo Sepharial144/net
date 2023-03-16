@@ -43,6 +43,8 @@ endif()
 
 set(SOURCE_DEPENDENCIES ${HDR_FILES} ${SRC_FILES})
 
+message(STATUS "Dependencies: ${SOURCE_DEPENDENCIES}")
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
