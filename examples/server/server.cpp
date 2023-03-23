@@ -1,4 +1,5 @@
 #include "net.hpp"
+#include "socket_definition.hpp"
 
 #include <iostream>
 #include <array>
@@ -13,7 +14,15 @@ int main()
 
     constexpr size_t messageSize = 1024ul;
     std::array<char, messageSize> request = { 0 };
-    net::server server(address, port, messageSize);
+    
+    net::addrinfo::SockSetting settings{
+        net::addrinfo::aifamily::inetv4,
+        net::addrinfo::aisocktype::stream,
+        net::addrinfo::aiprotocol::tcp,
+        net::addrinfo::aiflags::passive
+    };
+
+    net::server server(settings, address, port, messageSize);
 
     net::client client(messageSize);
 

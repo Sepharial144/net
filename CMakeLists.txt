@@ -29,7 +29,7 @@ if(WIN32)
         "${CMAKE_CURRENT_SOURCE_DIR}/source" 
         "${CMAKE_CURRENT_SOURCE_DIR}/source/win32"
     )
-else()
+elseif(linux)
     message(STATUS "Target os: linux")
 
     list(FILTER HDR_FILES EXCLUDE REGEX ".win32")

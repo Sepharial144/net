@@ -2,8 +2,10 @@
 
 namespace net
 {
-	server::server(const char* addr, const char* port, const size_t default_len)
-		:m_address{ addr },
+
+	server::server(net::addrinfo::SockSetting& setting, const char* addr, const char* port, const size_t default_len)
+		:m_serverSetting(setting),
+		 m_address{ addr },
 		 m_defaultPort{ port }
 	{
 		std::cout << "Server initializing ..." << &std::endl;
@@ -19,10 +21,10 @@ namespace net
 		struct addrinfo* pAddrInfo = nullptr;
 
 		ZeroMemory(&hints, sizeof(hints));
-		hints.ai_family = AF_INET;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-		hints.ai_flags = AI_PASSIVE; // investigate this value
+		hints.ai_family = m_serverSetting.aiFamily;
+		hints.ai_socktype = m_serverSetting.aiSocktype;
+		hints.ai_protocol = m_serverSetting.aiProtocol;
+		hints.ai_flags = m_serverSetting.aiFlags; // investigate this value
 
 		res = ::getaddrinfo(nullptr, port, &hints, &pAddrInfo);
 		if (res != 0)

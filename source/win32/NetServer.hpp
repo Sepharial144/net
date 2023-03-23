@@ -6,10 +6,13 @@
 
 namespace net
 {
-	class server
+	class server final
 	{
 	public:
-		explicit server(const char* addr, const char* port, const size_t default_len);
+		explicit server(net::addrinfo::SockSetting& setting, 
+						const char* addr, 
+						const char* port, 
+						const size_t default_len);
 		~server();
 
 		void close();
@@ -17,6 +20,7 @@ namespace net
 		int32_t waitConnection(client& client);
 
 	private:
+		net::addrinfo::SockSetting m_serverSetting;
 		WSADATA m_wsaData = { 0 };
 		SOCKET m_socket = { INVALID_SOCKET };
 		const char* m_address = nullptr;

@@ -4,10 +4,6 @@
 
 namespace net
 {
-	client::client()
-	{
-	}
-
 	client::client(const size_t len_message)
 		: m_socket{ INVALID_SOCKET }
 		, m_lenMessage{ len_message }
