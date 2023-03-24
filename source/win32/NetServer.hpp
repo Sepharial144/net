@@ -4,27 +4,37 @@
 #include "NetClient.hpp"
 #include "socket_definition.hpp"
 
+#include <exception>
+#include <variant>
+
 namespace net
 {
 	class server final
 	{
 	public:
-		explicit server(net::addrinfo::SockSetting& setting, 
+		explicit server(const net::addrinfo::SockSetting& setting, 
+						const int32_t port, 
+						const size_t default_len);
+
+		explicit server(const net::addrinfo::SockSetting& setting, 
 						const char* addr, 
 						const char* port, 
 						const size_t default_len);
 		~server();
 
 		void close();
-
 		int32_t waitConnection(client& client);
+
+	private:
+		void initializationWSA();
+		void listening(const int32_t count_connections);
 
 	private:
 		net::addrinfo::SockSetting m_serverSetting;
 		WSADATA m_wsaData = { 0 };
 		SOCKET m_socket = { INVALID_SOCKET };
 		const char* m_address = nullptr;
-		const char* m_defaultPort = nullptr;
+		std::variant<int32_t, const char*> m_defaultPort = nullptr;
 	};
 } // ! namespace net
 

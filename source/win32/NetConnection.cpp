@@ -1,4 +1,5 @@
 #include "NetConnection.hpp"
+#include "exceptions/SocketException.hpp"
 
 namespace net
 {
@@ -6,39 +7,33 @@ namespace net
 		:m_address{ addr },
 		 m_defaultPort{ port }
 	{
-		//m_connectionSettings.sin_family = AF_INET;
-		//m_connectionSettings.sin_addr.s_addr = ::inet_addr(m_address);
-		//m_connectionSettings.sin_port = ::htons(m_defaultPort);
+		std::cout << "Connection initialization ..." << &std::endl;
 
 		std::cout << "Connection: init WSA ..." << &std::endl;
-		int32_t res = ::WSAStartup(MAKEWORD(2, 2), &m_wsaData);
-		if (res != 0) {
-			std::cout << "Connection: WSAStartup failed with error : " << res << std::endl;
+		if (int32_t ret = ::WSAStartup(MAKEWORD(2, 2), &m_wsaData) != 0) {
+			throw net::exception("Netlib: connection init WSA failed", ret);
 		}
 		std::cout << "Connection: init WSA ... complete" << &std::endl;
 
 		struct addrinfo hints = { 0 };
 
+		// TODO: change connection cred to net space
 		hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 
 		// TODO: check getaddrinfo is correct
-		res = ::getaddrinfo(nullptr, port, &hints, &m_connectionSettings);
-		if (res != 0) {
-			std::cout << "Connection error while getaddrinfo: " << ::WSAGetLastError() << std::endl;
-			::WSACleanup();
+		if (int32_t ret = ::getaddrinfo(nullptr, port, &hints, &m_connectionSettings) != 0) {
+			throw net::exception("Netlib: connection getaddrinfo failed", ret);
 		}
 
 		m_socket = ::socket(m_connectionSettings->ai_family, m_connectionSettings->ai_socktype, m_connectionSettings->ai_protocol);
 		if (m_socket == INVALID_SOCKET)
-
 		{
-			std::cout << "Connection: create socket ... failed:" << ::WSAGetLastError() << &std::endl;
-			::WSACleanup();
+			throw net::exception("Netlib: connection create socket failed");
 		}
-		else
-			std::cout << "Connection: create socket ... success" << &std::endl;
+		std::cout << "Connection: create socket ... complete" << &std::endl;
+		std::cout << "Connection initialization ... complete" << &std::endl;
 	}
 
 
@@ -51,27 +46,33 @@ namespace net
 	void connection::close()
 	{
 		std::cout << "Connection: close socket ..." << &std::endl;
+		if (m_connectionSettings != nullptr)
+			::freeaddrinfo(m_connectionSettings);
+
 		if (m_socket != INVALID_SOCKET)
 		{
-			std::cout << "Connection: close socket ... failed" << WSAGetLastError() << &std::endl;
-			::closesocket(m_socket);
-			::freeaddrinfo(m_connectionSettings);
+			if (int32_t ret = ::closesocket(m_socket))
+			{
+				throw net::exception("Netlib: connection close socket failed");
+			}
 		}
 		::WSACleanup();
-		std::cout << "Connection: close socket ... success" << &std::endl;
+		std::cout << "Connection: close socket ... comlete" << &std::endl;
 	}
 
 
 	int32_t connection::connect()
 	{
-		std::cout << "Connection socket: " << m_socket << &std::endl;
-		if (::connect(m_socket, m_connectionSettings->ai_addr, m_connectionSettings->ai_addrlen) == SOCKET_ERROR)
+		std::cout << "Connection to server ..." << &std::endl;
+		if (int32_t ret = ::connect(m_socket, m_connectionSettings->ai_addr, m_connectionSettings->ai_addrlen) == SOCKET_ERROR)
 		{
 			printf("Client::connect() - Failed to connect.\n");
+			std::cout << "Connection: failed to connect" << &std::endl;
 			::WSACleanup();
 			return -1;
 		}
 		printf("Client::connect() - success.\n");
+		std::cout << "Connection to server ... complete" << &std::endl;
 		return 1;
 	}
 
@@ -79,18 +80,18 @@ namespace net
 	int32_t connection::recieve(char* data, size_t len)
 	{
 		std::cout << "Connection: recieve ... " << m_socket << &std::endl;
-		int res = ::recv(m_socket, data, len, 0);
-		std::cout << "Connection: recieve res ... " << res << &std::endl;
-		return res;
+		int ret = ::recv(m_socket, data, len, 0);
+		std::cout << "Connection: recieve res ... " << ret << &std::endl;
+		return ret;
 	}
 
 
 	int32_t connection::send(const char* data, size_t len)
 	{
 		std::cout << "Connection: send ... " << m_socket << &std::endl;
-		int32_t res = ::send(m_socket, data, len, 0);
+		int32_t ret = ::send(m_socket, data, len, 0);
 		std::cout << "Connection: send ... complete" << &std::endl;
-		return res;
+		return ret;
 	}
 
 	size_t connection::sendFrame(const char* data, size_t len)

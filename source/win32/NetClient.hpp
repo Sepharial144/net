@@ -15,7 +15,7 @@ namespace net
 		explicit client(const size_t len_message);
 		~client();
 		void close();
-		void shutdown(const int16_t param);
+		void shutdown(net::socket::shutdownMode param);
 		int32_t recieve(char* data, size_t len);
 		int32_t send(const char* data, size_t len);
 

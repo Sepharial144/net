@@ -1,6 +1,7 @@
 #include "NetServer.hpp"
 #include "NetClient.hpp"
 #include "algo.hpp"
+#include "exceptions/SocketException.hpp"
 
 namespace net
 {
@@ -18,27 +19,33 @@ namespace net
 	void client::close()
 	{
 		std::cout << "client socket: close socket ..." << &std::endl;
+		shutdown(net::socket::both);
+
 		if (m_socket != INVALID_SOCKET)
 		{
-			std::cout << "client socket: close socket ... failed" << ::WSAGetLastError() << &std::endl;
-			::closesocket(m_socket);
+			std::cout << "client socket: socket is not invalid, try close ..." << &std::endl;
+			if (int32_t ret = ::closesocket(m_socket) == SOCKET_ERROR)
+			{
+				throw net::exception("Netlib: client close socket failed", ret);
+			}
+			m_socket = INVALID_SOCKET;
 		}
 		::WSACleanup();
 		std::cout << "client socket: close socket ... success" << &std::endl;
 	}
 
-	void client::shutdown(const int16_t param)
+	void client::shutdown(net::socket::shutdownMode param)
 	{
-		// param
-		// SD_RECEIVE
-		// SD_SEND
-		// SD_BOTH
-		if (::shutdown(m_socket, param) == SOCKET_ERROR) {
-			std::cout << "Client shutdown failed with error: " << ::WSAGetLastError() << &std::endl;
-			::closesocket(m_socket);
-			::WSACleanup();
+		std::cout << "client socket: shutdown socket parameter: "<< param << " ... " << &std::endl;
+		if (int32_t ret = ::shutdown(m_socket, param) == SOCKET_ERROR) {
+			// TODO: implement doing with error if close socket
+			throw net::exception("Netlib: clientshutdown socket failed", ret);
+			//std::cout << "Client shutdown failed with error: " << ::WSAGetLastError() << &std::endl;
+			//::closesocket(m_socket);
+			//::WSACleanup();
 			return;
 		}
+		std::cout << "client socket: shutdown socket ... complete" << &std::endl;
 	}
 
 	int32_t client::recieve(char* data, size_t len)
