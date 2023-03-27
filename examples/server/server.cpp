@@ -10,23 +10,26 @@ using namespace net;
 int main()
 {
     const char* address = "127.0.0.1";
-    const char* port = "3000";
-    //int32_t port = 3000;
+    //const char* port = "3000";
+    int32_t port = 3000;
 
     constexpr size_t messageSize = 1024ul;
     std::array<char, messageSize> request = { 0 };
     
+    uint32_t countConnections = 10u;
+
     net::addrinfo::SockSetting settings{
         net::addrinfo::aifamily::inetv4,
         net::addrinfo::aisocktype::stream,
         net::addrinfo::aiprotocol::tcp,
-        net::addrinfo::aiflags::passive
+        net::addrinfo::aiflags::passive,
+        countConnections
     };
 
     try
     {
-        //net::server server(settings, port, messageSize);
-        net::server server(settings, address, port, messageSize);
+        net::server server(settings, port, messageSize);
+        //net::server server(settings, address, port, messageSize);
         net::client client(messageSize);
 
         std::cout << "Client size: " << sizeof(client) << &std::endl;

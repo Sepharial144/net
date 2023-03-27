@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
 
-TEST(CommonAlgorithmTest, Rank) {
+TEST(Api, testApi) {
 	SUCCEED();
 }

@@ -47,7 +47,10 @@ namespace net
 	{
 		std::cout << "Connection: close socket ..." << &std::endl;
 		if (m_connectionSettings != nullptr)
+		{
 			::freeaddrinfo(m_connectionSettings);
+			m_connectionSettings = nullptr;
+		}
 
 		if (m_socket != INVALID_SOCKET)
 		{
@@ -55,8 +58,9 @@ namespace net
 			{
 				throw net::exception("Netlib: connection close socket failed");
 			}
+			m_socket = INVALID_SOCKET;
+			::WSACleanup();
 		}
-		::WSACleanup();
 		std::cout << "Connection: close socket ... comlete" << &std::endl;
 	}
 
@@ -69,7 +73,7 @@ namespace net
 			printf("Client::connect() - Failed to connect.\n");
 			std::cout << "Connection: failed to connect" << &std::endl;
 			::WSACleanup();
-			return -1;
+			return SOCKET_ERROR;
 		}
 		printf("Client::connect() - success.\n");
 		std::cout << "Connection to server ... complete" << &std::endl;
@@ -79,19 +83,13 @@ namespace net
 
 	int32_t connection::recieve(char* data, size_t len)
 	{
-		std::cout << "Connection: recieve ... " << m_socket << &std::endl;
-		int ret = ::recv(m_socket, data, len, 0);
-		std::cout << "Connection: recieve res ... " << ret << &std::endl;
-		return ret;
+		return ::recv(m_socket, data, len, 0);
 	}
 
 
 	int32_t connection::send(const char* data, size_t len)
 	{
-		std::cout << "Connection: send ... " << m_socket << &std::endl;
-		int32_t ret = ::send(m_socket, data, len, 0);
-		std::cout << "Connection: send ... complete" << &std::endl;
-		return ret;
+		return ::send(m_socket, data, len, 0);
 	}
 
 	size_t connection::sendFrame(const char* data, size_t len)

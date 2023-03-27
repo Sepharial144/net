@@ -28,39 +28,30 @@ namespace net
 			{
 				throw net::exception("Netlib: client close socket failed", ret);
 			}
+			::WSACleanup();
 			m_socket = INVALID_SOCKET;
 		}
-		::WSACleanup();
-		std::cout << "client socket: close socket ... success" << &std::endl;
+		std::cout << "client socket: close socket ... complete" << &std::endl;
 	}
 
 	void client::shutdown(net::socket::shutdownMode param)
 	{
-		std::cout << "client socket: shutdown socket parameter: "<< param << " ... " << &std::endl;
+		// TODO: check different calls 
+		std::cout << "client socket: shutdown socket ... " << &std::endl;
 		if (int32_t ret = ::shutdown(m_socket, param) == SOCKET_ERROR) {
-			// TODO: implement doing with error if close socket
-			throw net::exception("Netlib: clientshutdown socket failed", ret);
-			//std::cout << "Client shutdown failed with error: " << ::WSAGetLastError() << &std::endl;
-			//::closesocket(m_socket);
-			//::WSACleanup();
-			return;
+			throw net::exception("Netlib: client shutdown socket failed", ret);
 		}
 		std::cout << "client socket: shutdown socket ... complete" << &std::endl;
 	}
 
 	int32_t client::recieve(char* data, size_t len)
 	{
-		std::cout << "client socket: recieve ... " << m_socket << &std::endl;
-		int res = ::recv(m_socket, data, len, 0);
-		std::cout << "client socket: recieve res ... " << res << &std::endl;
-		return res;
+		return ::recv(m_socket, data, len, 0);
 	}
 
 	int32_t client::send(const char* data, size_t len)
 	{
-		std::cout << "client socket: send ... " << m_socket << &std::endl;
 		return ::send(m_socket, data, len, 0);
-		std::cout << "client socket: send ... complete" << &std::endl;
 	}
 
 } // ! namespace net

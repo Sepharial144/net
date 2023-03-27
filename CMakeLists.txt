@@ -64,7 +64,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${NET_INCLUDE_DIR})
 message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 #add_subdirectory("examples/client")
-#add_subdirectory(tests)
+add_subdirectory(tests)
 
 add_subdirectory("examples/client")
 add_subdirectory("examples/server")

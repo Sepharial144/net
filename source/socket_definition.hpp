@@ -31,7 +31,7 @@ namespace net {
 
 	namespace addrinfo {
 
-		enum aifamily: uint32_t {
+		enum aifamily: int32_t {
 			unspecified = AF_UNSPEC,	// The address family is unspecified.
 			inetv4 = AF_INET,			// The Internet Protocol version 4 (IPv4)address family.
 			ipx = AF_IPX,
@@ -42,7 +42,7 @@ namespace net {
 			bluetooth = AF_BTH,			// The Bluetooth address family.This address family is only supported if a Bluetooth adapter is installed on Windows Server 2003 or later.
 		};
 
-		enum aisocktype: uint32_t {
+		enum aisocktype: int32_t {
 			stream = SOCK_STREAM,	// socket stream mode
 			dgram = SOCK_DGRAM,		// socket datagramm
 			raw = SOCK_RAW,			// socket raw
@@ -50,14 +50,14 @@ namespace net {
 			seqpacket = SOCK_SEQPACKET,
 		};
 
-		enum aiprotocol: uint32_t {
+		enum aiprotocol: int32_t {
 			icmp = IPPROTO_ICMP,
 			igmp = IPPROTO_IGMP,
 			tcp = IPPROTO_TCP,
 			udp = IPPROTO_UDP,
 		};
 
-		enum aiflags : uint32_t {
+		enum aiflags : int32_t {
 			passive = AI_PASSIVE,
 			cannonname = AI_CANONNAME,
 			numerichost = AI_NUMERICHOST,
@@ -78,6 +78,7 @@ namespace net {
 			aisocktype aiSocktype;// = aisocktype::TYPE_SOCK_STREAM;
 			aiprotocol aiProtocol;// = aiprotocol::PROTOCOL_TCP;
 			aiflags aiFlags;// = aiflags::FLAG_AI_PASSIVE;
+			uint32_t countConnection;
 		};
 
 		// connection setting to pass into construtor for client socket
