@@ -68,6 +68,7 @@ namespace net
 	int32_t connection::connect()
 	{
 		std::cout << "Connection to server ..." << &std::endl;
+		// TODO: create non-bloking sockets
 		if (int32_t ret = ::connect(m_socket, m_connectionSettings->ai_addr, m_connectionSettings->ai_addrlen) == SOCKET_ERROR)
 		{
 			printf("Client::connect() - Failed to connect.\n");

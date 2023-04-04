@@ -16,11 +16,11 @@ int main()
 
     try
     {
-        net::connection client(address, port);
-        if (client.connect())
+        net::connection tcp_client(address, port);
+        if (tcp_client.connect())
         {
             size_t len = message.size();
-            int32_t status = client.send(message.data(), message.size());
+            int32_t status = tcp_client.send(message.data(), message.size());
 
             std::cout << "Message sent len: " << len << " status: " << status << &std::endl;
             std::cout << "Message sent: " << message.data() << &std::endl;
@@ -28,7 +28,7 @@ int main()
             int32_t requestLen = 0;
             while (requestLen != SOCKET_ERROR)
             {
-                requestLen = client.recieve(request.data(), request.size());
+                requestLen = tcp_client.recieve(request.data(), request.size());
                 if (requestLen > 0)
                 {
                     std::cout << "Request len: " << requestLen << &std::endl;

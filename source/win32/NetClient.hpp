@@ -5,6 +5,14 @@
 
 namespace net
 {
+	struct ipAddress
+	{
+		u_short port;
+		uint8_t address[INET6_ADDRSTRLEN];
+		size_t addr_size;
+		net::addrinfo::aifamily type;
+	};
+
 	class client
 	{
 	private:
@@ -20,8 +28,14 @@ namespace net
 		int32_t send(const char* data, size_t len);
 
 	private:
+		void interpretFamily();
+
+	private:
 		SOCKET m_socket = { INVALID_SOCKET };
-		size_t m_lenMessage = { 0ul };
+		size_t m_lenMessage = {0ul};
+		sockaddr_storage m_sockaddrStorage = {0};
+		net::addrinfo::aifamily m_familyType;
+		ipAddress m_address = {0};
 	};
 } // ! namespace net
 

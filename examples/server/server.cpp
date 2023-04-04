@@ -28,13 +28,13 @@ int main()
 
     try
     {
-        net::server server(settings, port, messageSize);
+        net::server tcp_server(settings, port, messageSize);
         //net::server server(settings, address, port, messageSize);
         net::client client(messageSize);
 
         std::cout << "Client size: " << sizeof(client) << &std::endl;
         std::cout << "Wait connection... " << address << ":" << port << &std::endl;
-        int32_t status = server.waitConnection(client);
+        int32_t status = tcp_server.waitConnection(client);
 
         std::cout << "Connected! " << status << &std::endl;
 

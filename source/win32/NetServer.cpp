@@ -1,5 +1,6 @@
 #include "NetServer.hpp"
 #include "exceptions/SocketException.hpp"
+#include <array>
 
 namespace net
 {
@@ -144,13 +145,22 @@ namespace net
 		std::cout << "Server wait connection ... " << &std::endl;
 		client.m_socket = SOCKET_ERROR;
 
-		client.m_socket = ::accept(m_socket, nullptr, nullptr);
+		client.m_socket = ::accept(m_socket, reinterpret_cast<sockaddr*>(&client.m_sockaddrStorage), nullptr);
 
 		if (client.m_socket == SOCKET_ERROR)
 		{
-			std::cout << "Server client socket error: " << &std::endl;
+			// TODO: change to throw
+			std::cout << "Server client socket error after accepting!" << &std::endl;
 			return SOCKET_ERROR;
 		}
+
+		// share family type with client
+		client.m_familyType = m_serverSetting.aiFamily;
+		// TODO: think about good practive of interpreter
+		client.interpretFamily();
+
+		std::cout << "Server sockaddr_in ip: "   << client.m_address.address << "\n"
+				  << "Server sockaddr_in port: " << client.m_address.port << &std::endl;
 
 		std::cout << "Server connected client socket id ... " << client.m_socket << &std::endl;
 		return 1;
