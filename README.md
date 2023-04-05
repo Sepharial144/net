@@ -11,7 +11,7 @@ cmake --build build --config Debug
 # build release mode
 cmake --build build --config Release
 
-cmake --isntall .\build --prefix "include"
+cmake --install .\build --prefix "include"
 
 
 
