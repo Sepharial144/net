@@ -19,7 +19,6 @@ namespace net
 		friend class server;
 
 	public:
-		explicit client();
 		explicit client(const size_t len_message);
 		~client();
 		void close();

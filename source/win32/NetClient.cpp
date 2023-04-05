@@ -8,6 +8,7 @@ namespace net
 	client::client(const size_t len_message)
 		: m_socket{ INVALID_SOCKET }
 		, m_lenMessage{ len_message }
+		, m_sockaddrStorage{ 0 }
 		, m_address{ 0 }
 	{
 	}

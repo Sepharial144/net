@@ -3,6 +3,7 @@
 
 namespace net
 {
+	// TODO: create connection for different family
 	connection::connection(const char* addr, const char* port)
 		:m_address{ addr },
 		 m_defaultPort{ port }
@@ -17,7 +18,7 @@ namespace net
 
 		struct addrinfo hints = { 0 };
 
-		// TODO: change connection cred to net space
+		// TODO: create connection for different family
 		hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
@@ -71,6 +72,7 @@ namespace net
 		// TODO: create non-bloking sockets
 		if (int32_t ret = ::connect(m_socket, m_connectionSettings->ai_addr, m_connectionSettings->ai_addrlen) == SOCKET_ERROR)
 		{
+			// TODO: there is no reason to use cout message or will use throw instead return status
 			printf("Client::connect() - Failed to connect.\n");
 			std::cout << "Connection: failed to connect" << &std::endl;
 			::WSACleanup();
