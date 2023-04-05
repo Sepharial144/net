@@ -1,6 +1,5 @@
-#include "NetServer.hpp"
-#include "NetClient.hpp"
 #include "algo.hpp"
+#include "net.hpp"
 #include "exceptions/SocketException.hpp"
 
 namespace net
@@ -21,7 +20,7 @@ namespace net
 	void client::close()
 	{
 		std::cout << "client socket: close socket ..." << &std::endl;
-		shutdown(net::socket::both);
+		shutdown(net::enumShutdown::both);
 
 		if (m_socket != INVALID_SOCKET)
 		{
@@ -36,7 +35,7 @@ namespace net
 		std::cout << "client socket: close socket ... complete" << &std::endl;
 	}
 
-	void client::shutdown(net::socket::shutdownMode param)
+	void client::shutdown(net::enumShutdown param)
 	{
 		// TODO: check different calls 
 		std::cout << "client socket: shutdown socket ... " << &std::endl;

@@ -1,19 +1,198 @@
 #ifndef _NET_HPP_
 #define _NET_HPP_
 
-#include "socket_definition.hpp"
-#include "NetServer.hpp"
-#include "NetClient.hpp"
-#include "NetConnection.hpp"
+//#include "socket_definition.hpp"
+//#include "NetServer.hpp"
+//#include "NetClient.hpp"
+//#include "NetConnection.hpp"
 
-namespace net
-{
-	enum enumShutdown: int16_t
+#include <cstdint>
+#include <array>
+#include <variant>
+
+#if defined(_WIN32) && !defined(__linux__)
+
+#include "win32_definitions.hpp"
+
+#elif defined(linux) && !defined(_WIN32)
+
+#include "linux_definitions.h"
+
+#endif
+
+#include <cstdint>
+
+// settings of sockets
+#define SOCKET_TCPIP_PACKET_MAX_SIZE 65536;
+#define MAX_PORT_IPV4 65535;
+
+namespace net {
+	enum enumShutdown : int16_t
 	{
-		receive = SD_RECEIVE,
-		send = SD_SEND,
-		both = SD_BOTH
+		receive = SD_RECEIVE, // shutdown receive messages on socket
+		send = SD_SEND,		  // shutdown send messages on socket
+		both = SD_BOTH		  // shutdown receive and send messages on socket
 	};
+
+
+	namespace addrinfo {
+		enum aifamily : int32_t {
+			unspecified = AF_UNSPEC,	// The address family is unspecified.
+			inetv4 = AF_INET,			// The Internet Protocol version 4 (IPv4)address family.
+			ipx = AF_IPX,
+			appletalk = AF_APPLETALK,
+			netbios = AF_NETBIOS,		// The NetBIOS address family.This address family is only supported if a Windows Sockets provider for NetBIOS is installed.
+			inetv6 = AF_INET6,			// The Internet Protocol version 6 (IPv6)address family.
+			irda = AF_IRDA,				// The Infrared Data Association(IrDA) address family.This address family is only supported if the computer has an infrared portand driver installed.
+			bluetooth = AF_BTH,			// The Bluetooth address family.This address family is only supported if a Bluetooth adapter is installed on Windows Server 2003 or later.
+		};
+
+		enum aisocktype : int32_t {
+			stream = SOCK_STREAM,	// socket stream mode
+			dgram = SOCK_DGRAM,		// socket datagramm
+			raw = SOCK_RAW,			// socket raw
+			rdm = SOCK_RDM,
+			seqpacket = SOCK_SEQPACKET,
+		};
+
+		enum aiprotocol : int32_t {
+			icmp = IPPROTO_ICMP,
+			igmp = IPPROTO_IGMP,
+			tcp = IPPROTO_TCP,
+			udp = IPPROTO_UDP,
+		};
+
+		enum aiflags : int32_t {
+			passive = AI_PASSIVE,
+			cannonname = AI_CANONNAME,
+			numerichost = AI_NUMERICHOST,
+			numericserv = AI_NUMERICSERV,
+			all = AI_ALL,
+			addrconfig = AI_ADDRCONFIG,
+			v4mapped = AI_V4MAPPED,
+			authoritative = AI_NON_AUTHORITATIVE,
+			secure = AI_SECURE,
+			return_prefered_names = AI_RETURN_PREFERRED_NAMES,
+			fqdn = AI_FQDN,
+			fileserver = AI_FILESERVER
+		};
+
+		// socket setting to pass into construtor of base socket
+		struct SockSetting {
+			aifamily aiFamily;// = aifamily::FAM_AF_INET;
+			aisocktype aiSocktype;// = aisocktype::TYPE_SOCK_STREAM;
+			aiprotocol aiProtocol;// = aiprotocol::PROTOCOL_TCP;
+			aiflags aiFlags;// = aiflags::FLAG_AI_PASSIVE;
+			uint32_t countConnection;
+		};
+
+		// connection setting to pass into construtor for client socket
+		struct ConnectionSetting {
+			aifamily aiFamily;// = aifamily::FAM_AF_INET;
+			const char* ip_address;// = "127.0.0.1";
+			const char* port;
+			//int port;// = 0;
+		};
+	} // !namespace addrinfo
+
+	struct ipAddress
+	{
+		u_short port;
+		uint8_t address[INET6_ADDRSTRLEN];
+		size_t addr_size;
+		net::addrinfo::aifamily type;
+	};
+
+	class server;
+	class client;
+	class connection;
+
+	/*------------------------------------------------------------------------------------------------------------
+		Server 
+	*/
+	class server final
+	{
+	public:
+		explicit server(const net::addrinfo::SockSetting& settings,
+			const int32_t port,
+			const size_t default_len);
+
+		explicit server(const net::addrinfo::SockSetting& settings,
+			const char* addr,
+			const char* port,
+			const size_t default_len);
+		~server();
+
+		void close();
+		int32_t waitConnection(client& client);
+
+	private:
+		void initWSA();
+
+		void initListeningSocket(PADDRINFOA* pAddrInfo, int32_t family, int32_t socket_type, int32_t protocol, sockaddr* ai_address, int32_t ai_addrlen);
+		void listening(const int32_t count_connections);
+
+	private:
+		net::addrinfo::SockSetting m_serverSetting;
+		WSADATA m_wsaData = { 0 };
+		SOCKET m_socket = { INVALID_SOCKET };
+		const char* m_address = nullptr;
+		std::variant<int32_t, const char*> m_defaultPort = nullptr;
+	};
+
+
+	/*------------------------------------------------------------------------------------------------------------
+		Client
+	*/
+	class client final
+	{
+	private:
+		friend class server;
+
+	public:
+		explicit client(const size_t len_message);
+		~client();
+		void close();
+		void shutdown(net::enumShutdown param);
+		int32_t recieve(char* data, size_t len);
+		int32_t send(const char* data, size_t len);
+
+	private:
+		void interpretFamily();
+
+	private:
+		SOCKET m_socket = { INVALID_SOCKET };
+		size_t m_lenMessage = { 0ul };
+		sockaddr_storage m_sockaddrStorage = { 0 };
+		net::addrinfo::aifamily m_familyType;
+		ipAddress m_address = { 0 };
+	};
+
+	/*------------------------------------------------------------------------------------------------------------
+		Connection
+	*/
+	class connection final
+	{
+	public:
+		explicit connection() = delete;
+		explicit connection(const char* addr, const char* port);
+		~connection();
+		void close();
+
+		int32_t connect();
+		int32_t recieve(char* data, size_t len);
+		int32_t send(const char* data, size_t len);
+		size_t sendFrame(const char* data, size_t len);
+
+	private:
+		WSADATA m_wsaData = { 0 };
+		SOCKET m_socket = { INVALID_SOCKET };
+		const char* m_address = nullptr;
+		const char* m_defaultPort = nullptr;
+		struct addrinfo* m_connectionSettings = nullptr;
+		size_t m_defaultLengthMessage = 0ul;
+	};
+
 } // !namespace net
 
 #endif // !_NET_HPP

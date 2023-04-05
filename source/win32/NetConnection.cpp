@@ -1,4 +1,4 @@
-#include "NetConnection.hpp"
+#include "net.hpp"
 #include "exceptions/SocketException.hpp"
 
 namespace net

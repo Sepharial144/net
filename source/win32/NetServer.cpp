@@ -1,6 +1,5 @@
-#include "NetServer.hpp"
+#include "net.hpp"
 #include "exceptions/SocketException.hpp"
-#include <array>
 
 namespace net
 {
