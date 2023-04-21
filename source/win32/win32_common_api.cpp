@@ -5,44 +5,33 @@ namespace net
 {
 	namespace api
 	{
-		void initializeWSA()
+		void initializeWSA(WSADATA& wsa)
 		{
-			std::cout << "Netlib api: initialization WSA ..." << &std::endl;
-			if (WSA_CALL_COUNT == 0ul)
-			{
-				std::cout << "Netlib api: call WSA ..." << &std::endl;
-				int32_t ret = ::WSAStartup(MAKEWORD(2, 2), &WSA_DATA);
-				net::throw_exception_on(ret != 0, "Netlib: initialization WSA failed");
-				/*
-				if (int32_t ret = ::WSAStartup(MAKEWORD(2, 2), &WSA_DATA) != 0) {
-					throw net::exception("Netlib: initialization WSA failed", ret);
-				}
-				*/
-				std::cout << "Netlib api: call WSA ... complete" << &std::endl;
-			}
-			++WSA_CALL_COUNT;
-			std::cout << "Netlib api: WSA_CALL_COUNT ... " << WSA_CALL_COUNT << &std::endl;
-			std::cout << "Netlib api: initialization WSA ... complete" << &std::endl;
+			std::cout << "Initialization WSA ..." << &std::endl;
+			int32_t ret = ::WSAStartup(MAKEWORD(2, 2), &wsa);
+			net::throw_exception_on(ret != 0, "Netlib: initialization WSA failed");
+			std::cout << "Initialization WSA ... complete" << &std::endl;
 		}
 
-
-		void uninitializeWSA()
+		void interpretFamilyAddress(sockaddr_storage& addressStorage, net::ipAddress& address, net::addrinfo::aifamily family)
 		{
-			std::cout << "Netlib api: uninitialization WSA ..." << &std::endl;
-			--WSA_CALL_COUNT;
-			if (WSA_CALL_COUNT == 0ul)
+			if (family == net::addrinfo::inetv4)
 			{
-				int32_t ret = ::WSACleanup();
-				net::throw_exception_on(ret != 0, "Netlib: uninitialization WSA failed");
-				/*
-				if (int32_t ret = ::WSACleanup() != 0) {
-					throw net::exception("Netlib: uninitialization WSA failed", ret);
-				}
-				*/
-				std::cout << "Netlib api: call uninit WSA ... complete" << &std::endl;
+				sockaddr_in* ptrIpv4ClientAddr = reinterpret_cast<sockaddr_in*>(&addressStorage);
+				address.addr_size = static_cast<size_t>(INET_ADDRSTRLEN);
+				address.port = ::ntohs(ptrIpv4ClientAddr->sin_port);
+				::inet_ntop(net::addrinfo::inetv4, ptrIpv4ClientAddr, reinterpret_cast<PSTR>(address.address), address.addr_size);
+				return;
 			}
-			std::cout << "Netlib api: uninitialization WSA ... complete" << &std::endl;
-
+			if (family == net::addrinfo::inetv6)
+			{
+				sockaddr_in6* ptrIpv6ClientAddr = reinterpret_cast<sockaddr_in6*>(&addressStorage);
+				address.addr_size = static_cast<size_t>(INET6_ADDRSTRLEN);
+				address.port = ::ntohs(ptrIpv6ClientAddr->sin6_port);
+				::inet_ntop(net::addrinfo::inetv6, ptrIpv6ClientAddr, reinterpret_cast<PSTR>(address.address), address.addr_size);
+				return;
+			}
+			throw std::runtime_error("Netlib: could not recognize address family");
 		}
 	} // namespace api
 } // namespace net

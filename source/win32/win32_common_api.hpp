@@ -1,19 +1,16 @@
 #ifndef _WIN32_COMMON_API_HPP_
 #define _WIN32_COMMON_API_HPP_
 
+#include "net.hpp"
 #include "win32_definitions.hpp"
 
 namespace net
 {
     namespace api {
 
-        // TODO: make this variable for different thread
-        static inline int64_t WSA_CALL_COUNT = 0ul;
-        static inline WSADATA WSA_DATA = { 0 };
-
-        void   initializeWSA();
-        void uninitializeWSA();
-    
+        void initializeWSA(WSADATA& wsa);
+        void interpretFamilyAddress(sockaddr_storage& addressStorage, net::ipAddress& address, net::addrinfo::aifamily family);
+  
     } // !namespace api
 } // !namespace net
 

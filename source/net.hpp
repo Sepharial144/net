@@ -58,8 +58,8 @@ namespace net {
 		enum aiprotocol : int32_t {
 			icmp = IPPROTO_ICMP,
 			igmp = IPPROTO_IGMP,
-			tcp = IPPROTO_TCP,
-			udp = IPPROTO_UDP,
+			tcp  = IPPROTO_TCP,
+			udp  = IPPROTO_UDP,
 		};
 
 		enum aiflags : int32_t {
@@ -109,7 +109,7 @@ namespace net {
 
 #elif defined(linux) && !defined(_WIN32)
 
-	typedef int socket_t;
+	typedef int32_t socket_t;
 
 #endif
 
@@ -117,26 +117,23 @@ namespace net {
 	class client;
 	class connection;
 
-	/*------------------------------------------------------------------------------------------------------------
-		Server 
+	/*
+	*	Server 
 	*/
 	class server final
 	{
 	public:
 		explicit server(const net::addrinfo::SockSetting& settings,
-			const int32_t port,
-			const size_t default_len);
+			const int32_t port);
 
 		explicit server(const net::addrinfo::SockSetting& settings,
 			const char* addr,
-			const char* port,
-			const size_t default_len);
+			const char* port);
 		~server();
 		void close();
 		int32_t waitConnection(client& client);
 
 	private:
-		void initWSA();
 
 		void initListeningSocket(PADDRINFOA* pAddrInfo, 
 			int32_t family, 
@@ -145,19 +142,19 @@ namespace net {
 			sockaddr* ai_address, 
 			int32_t ai_addrlen);
 
-		void listening(const int32_t count_connections);
-
 	private:
+#if defined(_WIN32) && !defined(linux)
+		WSADATA m_wsaData;
+#endif
 		net::addrinfo::SockSetting m_serverSetting;
-		WSADATA m_wsaData = { 0 };
-		socket_t m_socket = { INVALID_SOCKET };
-		const char* m_address = nullptr;
-		std::variant<int32_t, const char*> m_defaultPort = nullptr;
+		socket_t m_socket;
+		const char* m_address;
+		std::variant<int32_t, const char*> m_defaultPort;
 	};
 
 
-	/*------------------------------------------------------------------------------------------------------------
-		Client
+	/*
+	*	Client
 	*/
 	class client final
 	{
@@ -173,18 +170,17 @@ namespace net {
 		int32_t send(const char* data, size_t len);
 
 	private:
-		void setSocketFamily(net::addrinfo::aifamily family);
-
-	private:
-		sockaddr_storage m_sockaddrStorage = { 0 };
-		socket_t m_socket = { INVALID_SOCKET };
-		size_t m_lenMessage = { 0ul };
+#if defined(_WIN32) && !defined(linux)
+		sockaddr_storage m_sockaddrStorage;
+#endif
+		socket_t m_socket;
+		size_t m_lenMessage;
 		net::addrinfo::aifamily m_familyType;
-		ipAddress m_address = { 0 };
+		ipAddress m_address;
 	};
 
-	/*------------------------------------------------------------------------------------------------------------
-		Connection
+	/*
+	*	Connection
 	*/
 	class connection final
 	{
@@ -199,12 +195,14 @@ namespace net {
 		size_t sendFrame(const char* data, size_t len);
 
 	private:
-		WSADATA m_wsaData = { 0 };
-		struct addrinfo* m_connectionSettings = nullptr;
-		socket_t m_socket = { INVALID_SOCKET };
-		const char* m_address = nullptr;
+#if defined(_WIN32) && !defined(linux)
+		WSADATA m_wsaData;
+		struct addrinfo* m_connectionSettings;
+#endif
+		socket_t m_socket;
+		const char* m_address;
 		const char* m_defaultPort = nullptr;
-		size_t m_defaultLengthMessage = 0ul;
+		size_t m_defaultLengthMessage;
 	};
 
 } // !namespace net

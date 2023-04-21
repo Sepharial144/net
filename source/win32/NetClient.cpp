@@ -5,9 +5,9 @@
 namespace net
 {
 	client::client(const size_t len_message)
-		: m_socket{ INVALID_SOCKET }
+		: m_sockaddrStorage{ 0 }
+		, m_socket { INVALID_SOCKET }
 		, m_lenMessage{ len_message }
-		, m_sockaddrStorage{ 0 }
 		, m_address{ 0 }
 	{
 	}
@@ -20,15 +20,13 @@ namespace net
 	void client::close()
 	{
 		std::cout << "client socket: close socket ..." << &std::endl;
-		shutdown(net::enumShutdown::both);
 
 		if (m_socket != INVALID_SOCKET)
 		{
+			shutdown(net::enumShutdown::both);
 			std::cout << "client socket: socket is not invalid, try close ..." << &std::endl;
-			if (int32_t ret = ::closesocket(m_socket) == SOCKET_ERROR)
-			{
-				throw net::exception("Netlib: client close socket failed", ret);
-			}
+			int32_t ret = ::closesocket(m_socket);
+			net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: client close socket failed");
 			::WSACleanup();
 			m_socket = INVALID_SOCKET;
 		}
@@ -39,9 +37,8 @@ namespace net
 	{
 		// TODO: check different calls 
 		std::cout << "client socket: shutdown socket ... " << &std::endl;
-		if (int32_t ret = ::shutdown(m_socket, param) == SOCKET_ERROR) {
-			throw net::exception("Netlib: client shutdown socket failed", ret);
-		}
+		int32_t ret = ::shutdown(m_socket, static_cast<int>(param));
+		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: client shutdown socket failed");
 		std::cout << "client socket: shutdown socket ... complete" << &std::endl;
 	}
 
@@ -53,28 +50,6 @@ namespace net
 	int32_t client::send(const char* data, size_t len)
 	{
 		return ::send(m_socket, data, len, 0);
-	}
-
-	void client::setSocketFamily(net::addrinfo::aifamily family)
-	{
-		m_familyType = family;
-		if (family == net::addrinfo::inetv4)
-		{
-			sockaddr_in* ptrIpv4ClientAddr = reinterpret_cast<sockaddr_in*>(&m_sockaddrStorage);
-			m_address.addr_size = static_cast<size_t>(INET_ADDRSTRLEN);
-			m_address.port = ntohs(ptrIpv4ClientAddr->sin_port);
-			inet_ntop(net::addrinfo::inetv4, ptrIpv4ClientAddr, reinterpret_cast<PSTR>(m_address.address), m_address.addr_size);
-			return;
-		}
-		if (family == net::addrinfo::inetv6)
-		{
-			sockaddr_in6* ptrIpv6ClientAddr = reinterpret_cast<sockaddr_in6*>(&m_sockaddrStorage);
-			m_address.addr_size = static_cast<size_t>(INET6_ADDRSTRLEN);
-			m_address.port = ntohs(ptrIpv6ClientAddr->sin6_port);
-			inet_ntop(net::addrinfo::inetv6, ptrIpv6ClientAddr, reinterpret_cast<PSTR>(m_address.address), m_address.addr_size);
-			return;
-		}
-		throw std::runtime_error("Netlib: client could not recognize address family");
 	}
 
 } // ! namespace net

@@ -27,7 +27,7 @@ int main()
 
     try
     {
-        net::server tcp_server(settings, port, messageSize);
+        net::server tcp_server(settings, port);
         //net::server server(settings, address, port, messageSize);
         net::client client(messageSize);
 

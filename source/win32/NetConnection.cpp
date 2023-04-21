@@ -1,20 +1,21 @@
 #include "net.hpp"
+#include "win32_common_api.hpp"
 #include "exceptions/SocketException.hpp"
 
 namespace net
 {
 	// TODO: create connection for different family
 	connection::connection(const char* addr, const char* port)
-		:m_address{ addr },
-		 m_defaultPort{ port }
+		: m_wsaData{ 0 }
+		, m_connectionSettings{ nullptr }
+		, m_socket{ INVALID_SOCKET }
+		, m_address { addr }
+		, m_defaultPort{ port }
+		, m_defaultLengthMessage{ 0ul }
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
 
-		std::cout << "Connection: init WSA ..." << &std::endl;
-		if (int32_t ret = ::WSAStartup(MAKEWORD(2, 2), &m_wsaData) != 0) {
-			throw net::exception("Netlib: connection init WSA failed", ret);
-		}
-		std::cout << "Connection: init WSA ... complete" << &std::endl;
+		net::api::initializeWSA(m_wsaData);
 
 		struct addrinfo hints = { 0 };
 
@@ -24,16 +25,16 @@ namespace net
 		hints.ai_protocol = IPPROTO_TCP;
 
 		// TODO: check getaddrinfo is correct
-		if (int32_t ret = ::getaddrinfo(nullptr, port, &hints, &m_connectionSettings) != 0) {
-			throw net::exception("Netlib: connection getaddrinfo failed", ret);
-		}
+		std::cout << "Connection: get addrinfo ..." << &std::endl;
+		int32_t ret = ::getaddrinfo(nullptr, port, &hints, &m_connectionSettings);
+		net::throw_exception_on(ret != 0, "Netlib: connection getaddrinfo failed");
+		std::cout << "Connection: get addrinfo ... complete" << &std::endl;
 
+		std::cout << "Connection: create socket ..." << &std::endl;
 		m_socket = ::socket(m_connectionSettings->ai_family, m_connectionSettings->ai_socktype, m_connectionSettings->ai_protocol);
-		if (m_socket == INVALID_SOCKET)
-		{
-			throw net::exception("Netlib: connection create socket failed");
-		}
+		net::throw_exception_on(m_socket == INVALID_SOCKET, "Netlib: connection create socket failed");
 		std::cout << "Connection: create socket ... complete" << &std::endl;
+
 		std::cout << "Connection initialization ... complete" << &std::endl;
 	}
 
@@ -55,10 +56,8 @@ namespace net
 
 		if (m_socket != INVALID_SOCKET)
 		{
-			if (int32_t ret = ::closesocket(m_socket))
-			{
-				throw net::exception("Netlib: connection close socket failed");
-			}
+			int32_t ret = ::closesocket(m_socket);
+			net::throw_exception_on(ret != SOCKET_ERROR, "Netlib: connection close socket failed");
 			m_socket = INVALID_SOCKET;
 			::WSACleanup();
 		}
@@ -73,12 +72,9 @@ namespace net
 		if (int32_t ret = ::connect(m_socket, m_connectionSettings->ai_addr, m_connectionSettings->ai_addrlen) == SOCKET_ERROR)
 		{
 			// TODO: there is no reason to use cout message or will use throw instead return status
-			printf("Client::connect() - Failed to connect.\n");
 			std::cout << "Connection: failed to connect" << &std::endl;
-			::WSACleanup();
 			return SOCKET_ERROR;
 		}
-		printf("Client::connect() - success.\n");
 		std::cout << "Connection to server ... complete" << &std::endl;
 		return 1;
 	}

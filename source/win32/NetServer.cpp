@@ -1,25 +1,29 @@
 #include "net.hpp"
+#include "win32_common_api.hpp"
 #include "exceptions/SocketException.hpp"
 
 namespace net
 {
-	server::server(const net::addrinfo::SockSetting& settings, const int32_t port, const size_t default_len)
-		:m_serverSetting(settings),
-		m_address{ nullptr },
-		m_defaultPort{ port }
+	server::server(const net::addrinfo::SockSetting& settings, const int32_t port)
+		: m_wsaData{ 0 }
+		, m_serverSetting{ settings }
+		, m_socket{ INVALID_SOCKET }
+		, m_address{ nullptr }
+		, m_defaultPort{ port }
 	{
 		if (port < static_cast<int32_t>(0))
 			throw std::logic_error("Netlib: server port should not be negative");
 
+		// TODO: implement SOMAXCON_HINT(N)
 		if (m_serverSetting.countConnection == 0u)
-			m_serverSetting.countConnection = 1u;
+			m_serverSetting.countConnection = SOMAXCONN;
 
 		std::cout << "Server initializing ..." << &std::endl;
-		initWSA();
+		net::api::initializeWSA(m_wsaData);
 
 		sockaddr_in address = { 0 };
 		address.sin_family = m_serverSetting.aiFamily;
-		address.sin_port = htons(port);
+		address.sin_port = ::htons(port);
 		address.sin_addr.s_addr = INADDR_ANY;
 
 		initListeningSocket(nullptr, 
@@ -32,14 +36,16 @@ namespace net
 		std::cout << "Server initializing ... complete" << &std::endl;
 	}
 
-	server::server(const net::addrinfo::SockSetting& settings, const char* addr, const char* port, const size_t default_len)
-		:m_serverSetting(settings),
-		 m_address{ addr },
-		 m_defaultPort{ port }
+	server::server(const net::addrinfo::SockSetting& settings, const char* addr, const char* port)
+		: m_wsaData{ 0 }
+		, m_serverSetting{ settings }
+		, m_socket{ INVALID_SOCKET }
+		, m_address{ addr }
+		, m_defaultPort{ port }
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
-		initWSA();
+		net::api::initializeWSA(m_wsaData);
 
 		struct addrinfo hints = { 0 };
 		struct addrinfo* pAddrInfo = nullptr;
@@ -52,13 +58,10 @@ namespace net
 
 
 		// TODO: implement certain address
-		if (int32_t ret = ::getaddrinfo(nullptr, port, &hints, &pAddrInfo) != 0)
-		{
-			// TODO: clean from message
-			std::cout << "Server getaddrinfo failed: " << WSAGetLastError() << "ret value: " << ret << &std::endl;
-			throw net::exception("Netlib: server get addrinfo failed", ret);
-		}
-		std::cout << "Server getaddrinfo ... complete" << &std::endl;
+		std::cout << "Server get addrinfo ... " << &std::endl;
+		int32_t ret = ::getaddrinfo(nullptr, port, &hints, &pAddrInfo);
+		net::throw_exception_on(ret != 0, "Netlib: server get addrinfo failed");
+		std::cout << "Server get addrinfo ... complete" << &std::endl;
 
 		initListeningSocket(&pAddrInfo,
 			pAddrInfo->ai_family,
@@ -67,17 +70,8 @@ namespace net
 			pAddrInfo->ai_addr,
 			pAddrInfo->ai_addrlen);
 
-		freeaddrinfo(pAddrInfo);
+		::freeaddrinfo(pAddrInfo);
 		std::cout << "Server initializing ... complete" << &std::endl;
-	}
-
-	void server::initWSA()
-	{
-		std::cout << "Server initialization WSA ..." << &std::endl;
-		if (int32_t ret = ::WSAStartup(MAKEWORD(2, 2), &m_wsaData) != 0) {
-			throw net::exception("Netlib: server initialization WSA failed", ret);
-		}
-		std::cout << "Server initialization WSA ... complete" << &std::endl;
 	}
 
 	void server::initListeningSocket(PADDRINFOA* pAddrInfo, 
@@ -87,7 +81,7 @@ namespace net
 									 sockaddr* ai_address, 
 									 int32_t ai_addrlen)
 	{
-		std::cout << "Server create socket ... " << &std::endl;
+		std::cout << "Server listening ... " << &std::endl;
 		m_socket = ::socket(family, socket_type, protocol);
 		if (m_socket == INVALID_SOCKET) {
 			if (pAddrInfo != nullptr)
@@ -98,21 +92,13 @@ namespace net
 			}
 			throw net::exception("Netlib: server create socket failed");
 		}
-		std::cout << "Server create socket ... complete" << &std::endl;
 
-		std::cout << "Server bind ... " << &std::endl;
-		if (int32_t ret = ::bind(m_socket, ai_address, static_cast<int>(ai_addrlen)) == SOCKET_ERROR)
-		{
-			close();
-			throw net::exception("Netlib: server bind failed", ret);
-		}
-		std::cout << "Server bind... complete" << &std::endl;
+		int32_t ret = ::bind(m_socket, ai_address, ai_addrlen);
+		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server bind failed");
 
-		std::cout << "Server listening ... " << &std::endl;
-		if (int32_t ret = ::listen(m_socket, m_serverSetting.countConnection) == SOCKET_ERROR)
-		{
-			throw net::exception("Netlib: server initialization WSA failed", ret);
-		}
+		ret = ::listen(m_socket, m_serverSetting.countConnection);
+		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server listening failed");
+
 		std::cout << "Server listening ... complete" << &std::endl;
 	}
 
@@ -128,10 +114,8 @@ namespace net
 		if (m_socket != INVALID_SOCKET)
 		{
 			std::cout << "Server socket is not invalid, close ... " << &std::endl;
-			if (int32_t ret = closesocket(m_socket) != SOCKET_ERROR)
-			{
-				throw net::exception("Netlib: server socket close failed", ret);
-			}
+			int32_t ret = ::closesocket(m_socket);
+			net::throw_exception_on(ret != SOCKET_ERROR, "Netlib: server socket close failed");
 			::WSACleanup();
 			m_socket = INVALID_SOCKET;
 		}
@@ -148,12 +132,12 @@ namespace net
 
 		if (client.m_socket == SOCKET_ERROR)
 		{
-			// TODO: change to throw
 			std::cout << "Server client socket error after accepting!" << &std::endl;
 			return SOCKET_ERROR;
 		}
 
-		client.setSocketFamily(m_serverSetting.aiFamily);
+		client.m_familyType = m_serverSetting.aiFamily;
+		net::api::interpretFamilyAddress(client.m_sockaddrStorage, client.m_address, m_serverSetting.aiFamily);
 
 		std::cout << "Server sockaddr_in ip: "   << client.m_address.address << "\n"
 				  << "Server sockaddr_in port: " << client.m_address.port << &std::endl;
