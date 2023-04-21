@@ -1,5 +1,5 @@
 #include "net.hpp"
-#include "SocketException.hpp"
+#include "net_exception.hpp"
 
 #include <sstream>
 

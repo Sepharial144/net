@@ -1,6 +1,6 @@
 #include "net.hpp"
 #include "win32_common_api.hpp"
-#include "exceptions/SocketException.hpp"
+#include "exceptions/net_exception.hpp"
 
 namespace net
 {

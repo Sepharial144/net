@@ -1,5 +1,5 @@
 #include "net.hpp"
-#include "exceptions/SocketException.hpp"
+#include "exceptions/net_exception.hpp"
 
 #include <iostream>
 #include <array>
