@@ -4,6 +4,7 @@
 // common includes
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 
 #if defined(_WIN32) && !defined(linux)
 	// windows

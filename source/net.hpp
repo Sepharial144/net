@@ -1,11 +1,6 @@
 #ifndef _NET_HPP_
 #define _NET_HPP_
 
-//#include "socket_definition.hpp"
-//#include "NetServer.hpp"
-//#include "NetClient.hpp"
-//#include "NetConnection.hpp"
-
 #include <cstdint>
 #include <array>
 #include <variant>
@@ -19,8 +14,6 @@
 #include "linux_definitions.h"
 
 #endif
-
-#include <cstdint>
 
 // settings of sockets
 #define SOCKET_TCPIP_PACKET_MAX_SIZE 65536;
@@ -98,7 +91,7 @@ namespace net {
 	struct ipAddress
 	{
 		u_short port;
-		uint8_t address[INET6_ADDRSTRLEN];
+		uint8_t address[INET6_ADDRSTRLEN]; // windows length of address ipv6
 		size_t addr_size;
 		net::addrinfo::aifamily type;
 	};
@@ -132,15 +125,6 @@ namespace net {
 		~server();
 		void close();
 		int32_t waitConnection(client& client);
-
-	private:
-
-		void initListeningSocket(PADDRINFOA* pAddrInfo, 
-			int32_t family, 
-			int32_t socket_type, 
-			int32_t protocol, 
-			sockaddr* ai_address, 
-			int32_t ai_addrlen);
 
 	private:
 #if defined(_WIN32) && !defined(linux)

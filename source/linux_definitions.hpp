@@ -3,6 +3,7 @@
 
 // common includes
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 
 #if defined(linux) && !defined(_WIN32)

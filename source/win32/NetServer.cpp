@@ -11,6 +11,8 @@ namespace net
 		, m_address{ nullptr }
 		, m_defaultPort{ port }
 	{
+		std::cout << "Server initializing ..." << &std::endl;
+
 		if (port < static_cast<int32_t>(0))
 			throw std::logic_error("Netlib: server port should not be negative");
 
@@ -18,20 +20,22 @@ namespace net
 		if (m_serverSetting.countConnection == 0u)
 			m_serverSetting.countConnection = SOMAXCONN;
 
-		std::cout << "Server initializing ..." << &std::endl;
 		net::api::initializeWSA(m_wsaData);
 
+		// TODO: what todo with sockaddr_in6?
 		sockaddr_in address = { 0 };
 		address.sin_family = m_serverSetting.aiFamily;
 		address.sin_port = ::htons(port);
 		address.sin_addr.s_addr = INADDR_ANY;
 
-		initListeningSocket(nullptr, 
-							m_serverSetting.aiFamily, 
-							m_serverSetting.aiSocktype, 
-							m_serverSetting.aiProtocol, 
-							(sockaddr*)&address, 
-							sizeof(address));
+		m_socket = ::socket(m_serverSetting.aiFamily, m_serverSetting.aiSocktype, m_serverSetting.aiProtocol);
+		net::throw_exception_on(m_socket == INVALID_SOCKET, "Netlib: server create socket failed");
+
+		int32_t ret = ::bind(m_socket, (sockaddr*)&address, sizeof(sockaddr));
+		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server bind failed");
+
+		ret = ::listen(m_socket, m_serverSetting.countConnection);
+		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server listening failed");
 
 		std::cout << "Server initializing ... complete" << &std::endl;
 	}
@@ -44,6 +48,10 @@ namespace net
 		, m_defaultPort{ port }
 	{
 		std::cout << "Server initializing ..." << &std::endl;
+
+		// TODO: implement SOMAXCON_HINT(N)
+		if (m_serverSetting.countConnection == 0u)
+			m_serverSetting.countConnection = SOMAXCONN;
 
 		net::api::initializeWSA(m_wsaData);
 
@@ -63,43 +71,22 @@ namespace net
 		net::throw_exception_on(ret != 0, "Netlib: server get addrinfo failed");
 		std::cout << "Server get addrinfo ... complete" << &std::endl;
 
-		initListeningSocket(&pAddrInfo,
-			pAddrInfo->ai_family,
-			pAddrInfo->ai_socktype,
-			pAddrInfo->ai_protocol,
-			pAddrInfo->ai_addr,
-			pAddrInfo->ai_addrlen);
-
-		::freeaddrinfo(pAddrInfo);
-		std::cout << "Server initializing ... complete" << &std::endl;
-	}
-
-	void server::initListeningSocket(PADDRINFOA* pAddrInfo, 
-									 int32_t family, 
-									 int32_t socket_type, 
-									 int32_t protocol, 
-									 sockaddr* ai_address, 
-									 int32_t ai_addrlen)
-	{
-		std::cout << "Server listening ... " << &std::endl;
-		m_socket = ::socket(family, socket_type, protocol);
-		if (m_socket == INVALID_SOCKET) {
-			if (pAddrInfo != nullptr)
-			{
-				::freeaddrinfo(*pAddrInfo);
-				::WSACleanup();
-				pAddrInfo = nullptr;
-			}
+		m_socket = ::socket(pAddrInfo->ai_family, pAddrInfo->ai_socktype, pAddrInfo->ai_protocol);
+		if (m_socket == INVALID_SOCKET) 
+		{
+			::freeaddrinfo(pAddrInfo);
+			::WSACleanup();
 			throw net::exception("Netlib: server create socket failed");
 		}
 
-		int32_t ret = ::bind(m_socket, ai_address, ai_addrlen);
+		ret = ::bind(m_socket, pAddrInfo->ai_addr, pAddrInfo->ai_addrlen);
 		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server bind failed");
 
 		ret = ::listen(m_socket, m_serverSetting.countConnection);
 		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server listening failed");
 
-		std::cout << "Server listening ... complete" << &std::endl;
+		::freeaddrinfo(pAddrInfo);
+		std::cout << "Server initializing ... complete" << &std::endl;
 	}
 
 	server::~server()
@@ -109,7 +96,6 @@ namespace net
 
 	void server::close()
 	{
-		// TODO: WSACleanup only with a good way, check it 
 		std::cout << "Server close socket ..." << &std::endl;
 		if (m_socket != INVALID_SOCKET)
 		{
