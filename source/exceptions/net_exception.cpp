@@ -3,6 +3,12 @@
 
 #include <sstream>
 
+#if defined(_WIN32) && !defined(linux)
+#define NET_ERROR_CODE ::WSAGetLastError()
+#elif defined(linux) && !defined(_WIN32)
+#define NET_ERROR_CODE errno
+#endif
+
 namespace net
 {
     void throw_exception_on(const bool is_error, const char* error)
@@ -14,18 +20,18 @@ namespace net
 
 #if defined(_WIN32) && !defined(linux)
     exception::exception(const char* error)
-        : m_errorCode{ ::WSAGetLastError() }
+        : m_errorCode{ NET_ERROR_CODE }
     {
         std::stringstream ss;
-        ss << " wsa code: " << std::to_string(m_errorCode);
+        ss << error << " wsa code: " << std::to_string(m_errorCode);
         m_error = ss.str();
     }
 
     exception::exception(const char* error, int32_t status_code)
-        : m_errorCode{ ::WSAGetLastError() }
+        : m_errorCode{ NET_ERROR_CODE }
     {
         std::stringstream ss;
-        ss << " wsa code: " << m_errorCode << " return code " << status_code;
+        ss << error << " wsa code: " << m_errorCode << " return code " << status_code;
         m_error = ss.str();
     }
 
@@ -36,14 +42,24 @@ namespace net
 
 #elif defined(linux) && !defined(_WIN32)
     exception::exception(const char* error)
-        : m_error{error}
-    {}
+        : m_errorCode{ NET_ERROR_CODE }
+    {
+        std::stringstream ss;
+        ss << error << " wsa code: " << std::to_string(m_errorCode);
+        m_error = ss.str();
+    }
 
     exception::exception(const char* error, int32_t status_code)
-        : m_error{ error }
+        : m_errorCode{ NET_ERROR_CODE }
     {
-        m_error.append(" return code: ");
-        m_error.append(std::to_string(status_code));
+        std::stringstream ss;
+        ss << error << " wsa code: " << m_errorCode << " return code " << status_code;
+        m_error = ss.str();
+}
+
+    int32_t exception::errorCode() const
+    {
+        return m_errorCode;
     }
 
 #endif
