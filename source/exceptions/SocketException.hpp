@@ -6,6 +6,14 @@
 
 namespace net
 {
+    /*
+    * Exception wrapper
+    */
+    void throw_exception_on(const bool is_error, const char* error);
+
+    /*
+    * Exception
+    */
     class exception : public std::exception
     {
     public:

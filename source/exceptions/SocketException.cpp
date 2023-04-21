@@ -5,6 +5,13 @@
 
 namespace net
 {
+    void throw_exception_on(const bool is_error, const char* error)
+    {
+        if (is_error)
+           throw net::exception(error);
+    }
+
+
 #if defined(_WIN32) && !defined(linux)
     exception::exception(const char* error)
         : m_errorCode{ ::WSAGetLastError() }

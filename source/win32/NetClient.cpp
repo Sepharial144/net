@@ -55,9 +55,10 @@ namespace net
 		return ::send(m_socket, data, len, 0);
 	}
 
-	void client::interpretFamily()
+	void client::setSocketFamily(net::addrinfo::aifamily family)
 	{
-		if (m_familyType == net::addrinfo::inetv4)
+		m_familyType = family;
+		if (family == net::addrinfo::inetv4)
 		{
 			sockaddr_in* ptrIpv4ClientAddr = reinterpret_cast<sockaddr_in*>(&m_sockaddrStorage);
 			m_address.addr_size = static_cast<size_t>(INET_ADDRSTRLEN);
@@ -65,7 +66,7 @@ namespace net
 			inet_ntop(net::addrinfo::inetv4, ptrIpv4ClientAddr, reinterpret_cast<PSTR>(m_address.address), m_address.addr_size);
 			return;
 		}
-		if (m_familyType == net::addrinfo::inetv6)
+		if (family == net::addrinfo::inetv6)
 		{
 			sockaddr_in6* ptrIpv6ClientAddr = reinterpret_cast<sockaddr_in6*>(&m_sockaddrStorage);
 			m_address.addr_size = static_cast<size_t>(INET6_ADDRSTRLEN);
@@ -73,10 +74,7 @@ namespace net
 			inet_ntop(net::addrinfo::inetv6, ptrIpv6ClientAddr, reinterpret_cast<PSTR>(m_address.address), m_address.addr_size);
 			return;
 		}
-		else
-		{
-			throw std::runtime_error("Netlib: client could not recognize address family");
-		}
+		throw std::runtime_error("Netlib: client could not recognize address family");
 	}
 
 } // ! namespace net

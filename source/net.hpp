@@ -103,6 +103,16 @@ namespace net {
 		net::addrinfo::aifamily type;
 	};
 
+#if defined(_WIN32) && !defined(linux)
+
+	typedef SOCKET socket_t;
+
+#elif defined(linux) && !defined(_WIN32)
+
+	typedef int socket_t;
+
+#endif
+
 	class server;
 	class client;
 	class connection;
@@ -122,20 +132,25 @@ namespace net {
 			const char* port,
 			const size_t default_len);
 		~server();
-
 		void close();
 		int32_t waitConnection(client& client);
 
 	private:
 		void initWSA();
 
-		void initListeningSocket(PADDRINFOA* pAddrInfo, int32_t family, int32_t socket_type, int32_t protocol, sockaddr* ai_address, int32_t ai_addrlen);
+		void initListeningSocket(PADDRINFOA* pAddrInfo, 
+			int32_t family, 
+			int32_t socket_type, 
+			int32_t protocol, 
+			sockaddr* ai_address, 
+			int32_t ai_addrlen);
+
 		void listening(const int32_t count_connections);
 
 	private:
 		net::addrinfo::SockSetting m_serverSetting;
 		WSADATA m_wsaData = { 0 };
-		SOCKET m_socket = { INVALID_SOCKET };
+		socket_t m_socket = { INVALID_SOCKET };
 		const char* m_address = nullptr;
 		std::variant<int32_t, const char*> m_defaultPort = nullptr;
 	};
@@ -158,12 +173,12 @@ namespace net {
 		int32_t send(const char* data, size_t len);
 
 	private:
-		void interpretFamily();
+		void setSocketFamily(net::addrinfo::aifamily family);
 
 	private:
-		SOCKET m_socket = { INVALID_SOCKET };
-		size_t m_lenMessage = { 0ul };
 		sockaddr_storage m_sockaddrStorage = { 0 };
+		socket_t m_socket = { INVALID_SOCKET };
+		size_t m_lenMessage = { 0ul };
 		net::addrinfo::aifamily m_familyType;
 		ipAddress m_address = { 0 };
 	};
@@ -178,7 +193,6 @@ namespace net {
 		explicit connection(const char* addr, const char* port);
 		~connection();
 		void close();
-
 		int32_t connect();
 		int32_t recieve(char* data, size_t len);
 		int32_t send(const char* data, size_t len);
@@ -186,10 +200,10 @@ namespace net {
 
 	private:
 		WSADATA m_wsaData = { 0 };
-		SOCKET m_socket = { INVALID_SOCKET };
+		struct addrinfo* m_connectionSettings = nullptr;
+		socket_t m_socket = { INVALID_SOCKET };
 		const char* m_address = nullptr;
 		const char* m_defaultPort = nullptr;
-		struct addrinfo* m_connectionSettings = nullptr;
 		size_t m_defaultLengthMessage = 0ul;
 	};
 

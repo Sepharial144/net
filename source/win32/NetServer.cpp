@@ -153,10 +153,7 @@ namespace net
 			return SOCKET_ERROR;
 		}
 
-		// share family type with client
-		client.m_familyType = m_serverSetting.aiFamily;
-		// TODO: think about good practive of interpreter
-		client.interpretFamily();
+		client.setSocketFamily(m_serverSetting.aiFamily);
 
 		std::cout << "Server sockaddr_in ip: "   << client.m_address.address << "\n"
 				  << "Server sockaddr_in port: " << client.m_address.port << &std::endl;
