@@ -146,7 +146,7 @@ namespace net {
 		friend class server;
 
 	public:
-		explicit client(const size_t len_message);
+		explicit client();
 		~client();
 		void close();
 		void shutdown(net::enumShutdown param);
@@ -158,7 +158,6 @@ namespace net {
 		sockaddr_storage m_sockaddrStorage;
 #endif
 		socket_t m_socket;
-		size_t m_lenMessage;
 		net::addrinfo::aifamily m_familyType;
 		ipAddress m_address;
 	};

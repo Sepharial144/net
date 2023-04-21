@@ -4,10 +4,9 @@
 
 namespace net
 {
-	client::client(const size_t len_message)
+	client::client()
 		: m_sockaddrStorage{ 0 }
 		, m_socket { INVALID_SOCKET }
-		, m_lenMessage{ len_message }
 		, m_address{ 0 }
 	{
 	}

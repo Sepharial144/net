@@ -29,7 +29,7 @@ int main()
     {
         net::server tcp_server(settings, port);
         //net::server server(settings, address, port, messageSize);
-        net::client client(messageSize);
+        net::client client;
 
         std::cout << "Client size: " << sizeof(client) << &std::endl;
         std::cout << "Wait connection... " << address << ":" << port << &std::endl;
