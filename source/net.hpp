@@ -76,6 +76,7 @@ namespace net {
 			aisocktype aiSocktype;// = aisocktype::TYPE_SOCK_STREAM;
 			aiprotocol aiProtocol;// = aiprotocol::PROTOCOL_TCP;
 			aiflags aiFlags;// = aiflags::FLAG_AI_PASSIVE;
+			::addrinfo* sockAddress;
 			uint32_t countConnection;
 		};
 
@@ -105,6 +106,18 @@ namespace net {
 	typedef int32_t socket_t;
 
 #endif
+	
+	socket_t make_server(WSADATA& wsa, addrinfo::SockSetting& setting, const char* address, int32_t port);
+	int32_t wait_connection(socket_t& sock_server, socket_t& sock_client, int32_t connections);
+	socket_t make_connection(addrinfo::SockSetting& setting, const char* address, const char* port);
+
+	int32_t read(socket_t& socket, char* data, size_t len);
+	int32_t write(socket_t& socket, const char* data, size_t len);
+	void shutdown(socket_t& socket, net::enumShutdown param);
+
+	void free(socket_t& socket);
+	void free(socket_t& socket, ::addrinfo* sock_address);
+	void release();
 
 	class server;
 	class client;
@@ -161,6 +174,7 @@ namespace net {
 		net::addrinfo::aifamily m_familyType;
 		ipAddress m_address;
 	};
+
 
 	/*
 	*	Connection

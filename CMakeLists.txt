@@ -68,6 +68,8 @@ add_subdirectory(tests)
 
 add_subdirectory("examples/client")
 add_subdirectory("examples/server")
+add_subdirectory("examples/tcp_server")
+add_subdirectory("examples/tcp_client")
 
 # TODO: finish configure project
 # fix execution install folder, does not work

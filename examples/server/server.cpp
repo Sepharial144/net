@@ -22,6 +22,7 @@ int main()
         net::addrinfo::aisocktype::stream,
         net::addrinfo::aiprotocol::tcp,
         net::addrinfo::aiflags::passive,
+        nullptr,
         countConnections
     };
 
