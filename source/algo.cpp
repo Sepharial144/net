@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <cstdint>
+#include <string>
 
 namespace net
 {

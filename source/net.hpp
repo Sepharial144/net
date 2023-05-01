@@ -11,7 +11,7 @@
 
 #elif defined(linux) && !defined(_WIN32)
 
-#include "linux_definitions.h"
+#include "linux_definitions.hpp"
 
 #endif
 

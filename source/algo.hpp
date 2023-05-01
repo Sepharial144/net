@@ -1,6 +1,8 @@
 #ifndef _NET_ALGO_HPP_
 #define _NET_ALGO_HPP_
 
+#include <string>
+
 namespace net
 {
     namespace algo {
