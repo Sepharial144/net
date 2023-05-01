@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.23)
+﻿cmake_minimum_required (VERSION 3.20)
 
 project(net VERSION 0.64 LANGUAGES CXX)
 
@@ -29,7 +29,7 @@ if(WIN32)
         "${CMAKE_CURRENT_SOURCE_DIR}/source" 
         "${CMAKE_CURRENT_SOURCE_DIR}/source/win32"
     )
-elseif(linux)
+elseif(UNIX)
     message(STATUS "Target os: linux")
 
     list(FILTER HDR_FILES EXCLUDE REGEX ".win32")

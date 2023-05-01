@@ -76,7 +76,9 @@ namespace net {
 			aisocktype aiSocktype;// = aisocktype::TYPE_SOCK_STREAM;
 			aiprotocol aiProtocol;// = aiprotocol::PROTOCOL_TCP;
 			aiflags aiFlags;// = aiflags::FLAG_AI_PASSIVE;
+#if defined(_WIN32) && !defined(linux)
 			::addrinfo* sockAddress;
+#endif
 			uint32_t countConnection;
 		};
 
@@ -106,8 +108,12 @@ namespace net {
 	typedef int32_t socket_t;
 
 #endif
-	
+
+#if defined(_WIN32) && !defined(linux)
 	socket_t make_server(WSADATA& wsa, addrinfo::SockSetting& setting, const char* address, int32_t port);
+#elif defined(linux) && !defined(_WIN32)
+	socket_t make_server(addrinfo::SockSetting& setting, const char* address, int32_t port);
+#endif
 	int32_t wait_connection(socket_t& sock_server, socket_t& sock_client, int32_t connections);
 	socket_t make_connection(addrinfo::SockSetting& setting, const char* address, const char* port);
 
@@ -116,8 +122,10 @@ namespace net {
 	void shutdown(socket_t& socket, net::enumShutdown param);
 
 	void free(socket_t& socket);
+#if defined(_WIN32) && !defined(linux)
 	void free(socket_t& socket, ::addrinfo* sock_address);
 	void release();
+#endif
 
 	class server;
 	class client;

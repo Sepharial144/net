@@ -9,6 +9,7 @@
 #define NET_ERROR_CODE errno
 #endif
 
+// TODO: change definition of exception to crossplatform
 namespace net
 {
     void throw_exception_on(const bool is_error, const char* error)
@@ -16,7 +17,6 @@ namespace net
         if (is_error)
            throw net::exception(error);
     }
-
 
 #if defined(_WIN32) && !defined(linux)
     exception::exception(const char* error)
@@ -35,17 +35,12 @@ namespace net
         m_error = ss.str();
     }
 
-    int32_t exception::errorCode() const
-    {
-        return m_errorCode;
-    }
-
 #elif defined(linux) && !defined(_WIN32)
     exception::exception(const char* error)
         : m_errorCode{ NET_ERROR_CODE }
     {
         std::stringstream ss;
-        ss << error << " wsa code: " << std::to_string(m_errorCode);
+        ss << error << " code: " << std::to_string(m_errorCode);
         m_error = ss.str();
     }
 
@@ -53,13 +48,8 @@ namespace net
         : m_errorCode{ NET_ERROR_CODE }
     {
         std::stringstream ss;
-        ss << error << " wsa code: " << m_errorCode << " return code " << status_code;
+        ss << error << " code: " << m_errorCode << " return code " << status_code;
         m_error = ss.str();
-}
-
-    int32_t exception::errorCode() const
-    {
-        return m_errorCode;
     }
 
 #endif
@@ -70,5 +60,10 @@ namespace net
 
     const char* exception::what() const noexcept {
         return m_error.c_str();
+    }
+
+    int32_t exception::errorCode() const
+    {
+        return m_errorCode;
     }
 } // !namespace net
