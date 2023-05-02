@@ -17,14 +17,14 @@ int main()
         net::addrinfo::aisocktype::stream,
         net::addrinfo::aiprotocol::tcp,
         net::addrinfo::aiflags::passive,
-        nullptr,
+        //nullptr,
         10ul
     };
 
     try
     {
-        WSADATA wsaData;
-        net::socket_t tcp_server = net::make_server(wsaData, settings, address, port);
+        //WSADATA wsaData;
+        net::socket_t tcp_server = net::make_server(settings, address, port);
         net::socket_t tcp_client;
         
         if (net::wait_connection(tcp_server, tcp_client, 10))
@@ -50,12 +50,13 @@ int main()
             }
         }
         std::cout << "Close server ... " << &std::endl;
-        net::free(tcp_server, settings.sockAddress);
+        //net::free(tcp_server, settings.sockAddress);
+        net::free(tcp_server);
         std::cout << "Close server ... complete" << &std::endl;
         std::cout << "Close connection ... " << &std::endl;
         net::shutdown(tcp_client, net::enumShutdown::both);
         net::free(tcp_client);
-        net::release();
+        //net::release();
         std::cout << "Close connection ... complete" << &std::endl;
         
     }

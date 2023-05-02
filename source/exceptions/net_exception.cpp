@@ -5,8 +5,10 @@
 
 #if defined(_WIN32) && !defined(linux)
 #define NET_ERROR_CODE ::WSAGetLastError()
+#define NET_OS_MESSAGE " wsa code: "
 #elif defined(linux) && !defined(_WIN32)
 #define NET_ERROR_CODE errno
+#define NET_OS_MESSAGE " code: "
 #endif
 
 // TODO: change definition of exception to crossplatform
@@ -18,12 +20,11 @@ namespace net
            throw net::exception(error);
     }
 
-#if defined(_WIN32) && !defined(linux)
     exception::exception(const char* error)
         : m_errorCode{ NET_ERROR_CODE }
     {
         std::stringstream ss;
-        ss << error << " wsa code: " << std::to_string(m_errorCode);
+        ss << error << NET_OS_MESSAGE << std::to_string(m_errorCode);
         m_error = ss.str();
     }
 
@@ -31,28 +32,9 @@ namespace net
         : m_errorCode{ NET_ERROR_CODE }
     {
         std::stringstream ss;
-        ss << error << " wsa code: " << m_errorCode << " return code " << status_code;
+        ss << error << NET_OS_MESSAGE << m_errorCode << " return code " << status_code;
         m_error = ss.str();
     }
-
-#elif defined(linux) && !defined(_WIN32)
-    exception::exception(const char* error)
-        : m_errorCode{ NET_ERROR_CODE }
-    {
-        std::stringstream ss;
-        ss << error << " code: " << std::to_string(m_errorCode);
-        m_error = ss.str();
-    }
-
-    exception::exception(const char* error, int32_t status_code)
-        : m_errorCode{ NET_ERROR_CODE }
-    {
-        std::stringstream ss;
-        ss << error << " code: " << m_errorCode << " return code " << status_code;
-        m_error = ss.str();
-    }
-
-#endif
 
     exception::~exception() noexcept
     {

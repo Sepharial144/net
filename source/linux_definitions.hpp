@@ -14,6 +14,20 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <netdb.h>
+
+/*
+* Socket error
+*/
+#define NET_SOCKET_ERROR -1
+// IIQ: is connection reset on linux as -1?
+#define NET_CONNECTION_RESET -1
+/*
+* Socket shutdown parameter
+*/
+#define NET_SOCKET_RECEIVE SHUT_RD
+#define NET_SOCKET_SEND	   SHUT_WR
+#define NET_SOCKET_BOTH    SHUT_RDWR
 
 #endif
 

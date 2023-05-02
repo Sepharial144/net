@@ -26,7 +26,7 @@ int main()
             std::cout << "Message sent: " << message.data() << &std::endl;
 
             int32_t requestLen = 0;
-            while (requestLen != SOCKET_ERROR)
+            while (requestLen != NET_SOCKET_ERROR)
             {
                 requestLen = tcp_client.recieve(request.data(), request.size());
                 if (requestLen > 0)
@@ -34,12 +34,12 @@ int main()
                     std::cout << "Request len: " << requestLen << &std::endl;
                     std::cout << "Request: " << request.data() << &std::endl;
                 }
-                if (requestLen == 0 || requestLen == WSAECONNRESET)
+                if (requestLen == 0 || requestLen == NET_CONNECTION_RESET)
                 {
                     std::cout << "Client: connection reset." << std::endl;
                     break;
                 }
-                if (requestLen == SOCKET_ERROR)
+                if (requestLen == NET_SOCKET_ERROR)
                     std::cout << "Client: connection closed." << std::endl;
             }
         }

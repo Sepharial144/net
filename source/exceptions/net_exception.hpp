@@ -22,15 +22,11 @@ namespace net
         virtual ~exception() noexcept;
         virtual const char* what() const noexcept;
 
-//#if defined(_WIN32) && !defined(linux)
-        int32_t exception::errorCode() const;
-//#endif
+        int32_t errorCode() const;
 
     protected:
         std::string m_error;
-//#if defined(_WIN32) && !defined(linux)
         int32_t m_errorCode;
-//#endif
     };
 
 } // !namespace net

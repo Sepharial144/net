@@ -19,12 +19,18 @@
 #define SOCKET_TCPIP_PACKET_MAX_SIZE 65536;
 #define MAX_PORT_IPV4 65535;
 
+#if defined(_WIN32) && !defined(linux)
+	#define NET_SOCKET_ERROR SOCKET_ERROR
+#elif defined(linux) && !defined(_WIN32)
+	#define NET_SOCKET_ERROR -1
+#endif
+
 namespace net {
 	enum enumShutdown : int16_t
 	{
-		receive = SD_RECEIVE, // shutdown receive messages on socket
-		send = SD_SEND,		  // shutdown send messages on socket
-		both = SD_BOTH		  // shutdown receive and send messages on socket
+		receive = NET_SOCKET_RECEIVE, // shutdown receive messages on socket
+		send = NET_SOCKET_SEND,	  	  // shutdown send messages on socket
+		both = NET_SOCKET_BOTH		  // shutdown receive and send messages on socket
 	};
 
 
@@ -34,10 +40,12 @@ namespace net {
 			inetv4 = AF_INET,			// The Internet Protocol version 4 (IPv4)address family.
 			ipx = AF_IPX,
 			appletalk = AF_APPLETALK,
-			netbios = AF_NETBIOS,		// The NetBIOS address family.This address family is only supported if a Windows Sockets provider for NetBIOS is installed.
 			inetv6 = AF_INET6,			// The Internet Protocol version 6 (IPv6)address family.
 			irda = AF_IRDA,				// The Infrared Data Association(IrDA) address family.This address family is only supported if the computer has an infrared portand driver installed.
+			#if defined(_WIN32) && !defined(linux)
+			netbios = AF_NETBIOS,
 			bluetooth = AF_BTH,			// The Bluetooth address family.This address family is only supported if a Bluetooth adapter is installed on Windows Server 2003 or later.
+			#endif
 		};
 
 		enum aisocktype : int32_t {
@@ -63,11 +71,13 @@ namespace net {
 			all = AI_ALL,
 			addrconfig = AI_ADDRCONFIG,
 			v4mapped = AI_V4MAPPED,
+			#if defined(_WIN32) && !defined(linux)
 			authoritative = AI_NON_AUTHORITATIVE,
 			secure = AI_SECURE,
 			return_prefered_names = AI_RETURN_PREFERRED_NAMES,
 			fqdn = AI_FQDN,
 			fileserver = AI_FILESERVER
+			#endif
 		};
 
 		// socket setting to pass into construtor of base socket

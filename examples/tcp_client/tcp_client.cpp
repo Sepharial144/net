@@ -17,7 +17,7 @@ int main()
         net::addrinfo::aisocktype::stream,
         net::addrinfo::aiprotocol::tcp,
         net::addrinfo::aiflags::passive,
-        nullptr,
+        //nullptr,
         10ul
     };
 
@@ -44,7 +44,7 @@ int main()
         std::cout << "Connection close ..." << &std::endl;
         net::shutdown(tcp_connection, net::enumShutdown::both);
         net::free(tcp_connection);
-        net::release();
+        //net::release();
         std::cout << "Connection close ... complete" << &std::endl;
     }
     catch (const std::exception& e)
