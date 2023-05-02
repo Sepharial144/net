@@ -1,5 +1,6 @@
 #include "net.hpp"
 #include "exceptions/net_exception.hpp"
+#include "common_api.hpp"
 
 namespace net { 
 
@@ -64,7 +65,7 @@ namespace net {
 
         struct sockaddr_in addr = { 0 };
         addr.sin_family = AF_INET;
-        addr.sin_port = ::htons(3000);
+		addr.sin_port = ::htons(net::api::translatePort<int32_t>(port));
         addr.sin_addr.s_addr = ::htonl(INADDR_LOOPBACK);
         int32_t ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
         net::throw_exception_on(ret < 0, "Netlib: connection failed");
