@@ -16,8 +16,8 @@
 #endif
 
 // settings of sockets
-#define SOCKET_TCPIP_PACKET_MAX_SIZE 65536;
-#define MAX_PORT_IPV4 65535;
+#define NET_TCPIP_PACKET_MAX_SIZE 65536;
+#define NET_IPV4_MAX_PORT 65535;
 
 #if defined(_WIN32) && !defined(linux)
 	#define NET_SOCKET_ERROR SOCKET_ERROR

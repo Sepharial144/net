@@ -1,6 +1,6 @@
 #include "net.hpp"
 #include "exceptions/net_exception.hpp"
-#include "common_api.hpp"
+#include "net_api.hpp"
 
 namespace net { 
 
@@ -64,7 +64,7 @@ namespace net {
         // ::socket(setting.aiFamily, setting.aiSocktype, 0);
 
         struct sockaddr_in addr = { 0 };
-        addr.sin_family = AF_INET;
+        addr.sin_family = setting.aiFamily;
 		addr.sin_port = ::htons(net::api::translatePort<int32_t>(port));
         addr.sin_addr.s_addr = ::htonl(INADDR_LOOPBACK);
         int32_t ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));

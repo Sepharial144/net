@@ -1,11 +1,13 @@
-#ifndef _COMMON_API_HPP_
-#define _COMMON_API_HPP_
+#ifndef _NET_API_HPP_
+#define _NET_API_HPP_
 
 #include "net.hpp"
 
 namespace net
 {
     namespace api {
+
+        const char* translateAddress(const char* address);
 
         template<typename Numeric>
         Numeric translatePort(const char* port)
@@ -22,4 +24,4 @@ namespace net
     } // namespace api
 } // namespace net
 
-#endif // !_COMMON_API_HPP_
+#endif // !_NET_API_HPP_
