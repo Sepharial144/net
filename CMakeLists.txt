@@ -9,6 +9,7 @@ file(GLOB_RECURSE SRC_FILES "source/*.cpp")
 
 if(WIN32)
     message(STATUS "Target os: win32")
+    set(TARGET_OS "win")
 
     #find_library(WSOCK32_LIBRARY wsock32.lib)
     #find_library(WS2_32_LIBRARY ws2_32.lib)
@@ -31,6 +32,7 @@ if(WIN32)
     )
 elseif(UNIX)
     message(STATUS "Target os: linux")
+    set(TARGET_OS "linux")
 
     list(FILTER HDR_FILES EXCLUDE REGEX ".win32")
     list(FILTER SRC_FILES EXCLUDE REGEX ".win32")
@@ -63,13 +65,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${NET_INCLUDE_DIR})
 
 message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
-#add_subdirectory("examples/client")
 add_subdirectory(tests)
 
 #add_subdirectory("examples/client")
 #add_subdirectory("examples/server")
-add_subdirectory("examples/tcp_server")
-add_subdirectory("examples/tcp_client")
+add_subdirectory("examples/${TARGET_OS}/tcp_server")
+add_subdirectory("examples/${TARGET_OS}/tcp_client")
 
 # TODO: finish configure project
 # fix execution install folder, does not work
