@@ -4,7 +4,7 @@
 
 namespace net { 
 
-    socket_t make_server(addrinfo::SockSetting& setting, const char* address, int32_t port)
+    socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -56,7 +56,7 @@ namespace net {
 	}
 
     	//TODO: fix int port to char
-	socket_t make_connection(addrinfo::SockSetting& setting, const char* address, const char* port)
+	socket_t make_connection(settings::SockSetting& setting, const char* address, const char* port)
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
 
@@ -105,7 +105,7 @@ namespace net {
 		std::cout << "Close socket ... complete" << &std::endl;
 	}
 
-    server::server(const net::addrinfo::SockSetting& settings, const int32_t port)
+    server::server(const net::settings::SockSetting& settings, const int32_t port)
 		: m_serverSetting{ settings }
 		, m_socket{ 0 }
 		, m_address{ nullptr }
@@ -113,7 +113,7 @@ namespace net {
 	{
     }
 
-    server::server(const net::addrinfo::SockSetting& settings, const char* addr, const char* port)
+    server::server(const net::settings::SockSetting& settings, const char* addr, const char* port)
 		: m_serverSetting{ settings }
 		, m_socket{ 0 }
 		, m_address{ addr }

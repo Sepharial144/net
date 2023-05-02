@@ -4,7 +4,7 @@
 
 namespace net
 {
-	socket_t make_server(WSADATA& wsa, addrinfo::SockSetting& setting, const char* address, int32_t port)
+	socket_t make_server(WSADATA& wsa, settings::SockSetting& setting, const char* address, int32_t port)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -57,7 +57,7 @@ namespace net
 	}
 
 	//TODO: fix int port to char
-	socket_t make_connection(addrinfo::SockSetting& setting, const char* address, const char* port)
+	socket_t make_connection(settings::SockSetting& setting, const char* address, const char* port)
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
 

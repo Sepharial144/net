@@ -34,7 +34,7 @@ namespace net {
 	};
 
 
-	namespace addrinfo {
+	namespace settings {
 		enum aifamily : int32_t {
 			unspecified = AF_UNSPEC,	// The address family is unspecified.
 			inetv4 = AF_INET,			// The Internet Protocol version 4 (IPv4)address family.
@@ -99,14 +99,14 @@ namespace net {
 			const char* port;
 			//int port;// = 0;
 		};
-	} // !namespace addrinfo
+	} // !namespace settings
 
 	struct ipAddress
 	{
 		u_short port;
 		uint8_t address[INET6_ADDRSTRLEN]; // windows length of address ipv6
 		size_t addr_size;
-		net::addrinfo::aifamily type;
+		net::settings::aifamily type;
 	};
 
 #if defined(_WIN32) && !defined(linux)
@@ -120,12 +120,12 @@ namespace net {
 #endif
 
 #if defined(_WIN32) && !defined(linux)
-	socket_t make_server(WSADATA& wsa, addrinfo::SockSetting& setting, const char* address, int32_t port);
+	socket_t make_server(WSADATA& wsa, settings::SockSetting& setting, const char* address, int32_t port);
 #elif defined(linux) && !defined(_WIN32)
-	socket_t make_server(addrinfo::SockSetting& setting, const char* address, int32_t port);
+	socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port);
 #endif
 	int32_t wait_connection(socket_t& sock_server, socket_t& sock_client, int32_t connections);
-	socket_t make_connection(addrinfo::SockSetting& setting, const char* address, const char* port);
+	socket_t make_connection(settings::SockSetting& setting, const char* address, const char* port);
 
 	int32_t read(socket_t& socket, char* data, size_t len);
 	int32_t write(socket_t& socket, const char* data, size_t len);
@@ -147,10 +147,10 @@ namespace net {
 	class server final
 	{
 	public:
-		explicit server(const net::addrinfo::SockSetting& settings,
+		explicit server(const net::settings::SockSetting& settings,
 			const int32_t port);
 
-		explicit server(const net::addrinfo::SockSetting& settings,
+		explicit server(const net::settings::SockSetting& settings,
 			const char* addr,
 			const char* port);
 		~server();
@@ -161,7 +161,7 @@ namespace net {
 #if defined(_WIN32) && !defined(linux)
 		WSADATA m_wsaData;
 #endif
-		net::addrinfo::SockSetting m_serverSetting;
+		net::settings::SockSetting m_serverSetting;
 		socket_t m_socket;
 		const char* m_address;
 		std::variant<int32_t, const char*> m_defaultPort;
@@ -189,7 +189,7 @@ namespace net {
 		sockaddr_storage m_sockaddrStorage;
 #endif
 		socket_t m_socket;
-		net::addrinfo::aifamily m_familyType;
+		net::settings::aifamily m_familyType;
 		ipAddress m_address;
 	};
 

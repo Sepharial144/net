@@ -12,11 +12,11 @@ int main()
     const char* address = "127.0.0.1";
     int32_t port = 3000;
 
-    net::addrinfo::SockSetting settings{
-        net::addrinfo::aifamily::inetv4,
-        net::addrinfo::aisocktype::stream,
-        net::addrinfo::aiprotocol::tcp,
-        net::addrinfo::aiflags::passive,
+    net::settings::SockSetting settings{
+        net::settings::aifamily::inetv4,
+        net::settings::aisocktype::stream,
+        net::settings::aiprotocol::tcp,
+        net::settings::aiflags::passive,
         10ul
     };
 
