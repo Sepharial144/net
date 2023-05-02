@@ -4,15 +4,15 @@
 
 namespace net
 {
-	socket_t make_server(WSADATA& wsa, settings::SockSetting& setting, const char* address, int32_t port)
+	socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
 		if (port < static_cast<int32_t>(0))
 			throw std::logic_error("Netlib: server port should not be negative");
 
-		//WSADATA wsaData = { 0 };
-		net::api::initializeWSA(wsa);
+		WSADATA wsaData = { 0 };
+		net::api::initializeWSA(wsaData);
 
 		sockaddr_in sockAddress = { 0 };
 		sockAddress.sin_family = setting.aiFamily;

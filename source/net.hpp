@@ -120,7 +120,7 @@ namespace net {
 #endif
 
 #if defined(_WIN32) && !defined(linux)
-	socket_t make_server(WSADATA& wsa, settings::SockSetting& setting, const char* address, int32_t port);
+	socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port);
 #elif defined(linux) && !defined(_WIN32)
 	socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port);
 #endif

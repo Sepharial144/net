@@ -11,7 +11,7 @@ namespace net
         void initializeWSA(WSADATA& wsa);
         void interpretFamilyAddress(sockaddr_storage& addressStorage, 
                                     net::ipAddress& address, 
-                                    net::addrinfo::aifamily family);
+                                    net::settings::aifamily family);
   
     } // !namespace api
 } // !namespace net
