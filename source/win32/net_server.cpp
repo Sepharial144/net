@@ -4,7 +4,7 @@
 
 namespace net
 {
-	server::server(const net::settings::SockSetting& settings, const int32_t port)
+	server::server(const net::settings::server_t& settings, const int32_t port)
 		: m_wsaData{ 0 }
 		, m_serverSetting{ settings }
 		, m_socket{ INVALID_SOCKET }
@@ -40,7 +40,7 @@ namespace net
 		std::cout << "Server initializing ... complete" << &std::endl;
 	}
 
-	server::server(const net::settings::SockSetting& settings, const char* addr, const char* port)
+	server::server(const net::settings::server_t& settings, const char* addr, const char* port)
 		: m_wsaData{ 0 }
 		, m_serverSetting{ settings }
 		, m_socket{ INVALID_SOCKET }

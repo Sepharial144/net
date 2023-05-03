@@ -13,6 +13,13 @@ namespace net
 			std::cout << "Initialization WSA ... complete" << &std::endl;
 		}
 
+		void releaseAddrinfo(::addrinfo* p_sockaddr)
+		{
+			if (p_sockaddr != nullptr)
+				::freeaddrinfo(p_sockaddr);
+			p_sockaddr = nullptr;
+		}
+
 		void interpretFamilyAddress(sockaddr_storage& addressStorage, net::ipAddress& address, net::settings::aifamily family)
 		{
 			if (family == net::settings::inetv4)

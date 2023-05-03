@@ -10,15 +10,14 @@
 int main()
 {
     const char* address = "127.0.0.1";
-    const char* port = "3000";
+    const char* port = "3001";
 
-    net::settings::SockSetting settings{
+    net::settings::connection_t settings{
         net::settings::aifamily::inetv4,
         net::settings::aisocktype::stream,
         net::settings::aiprotocol::tcp,
         net::settings::aiflags::passive,
-        nullptr,
-        10ul
+        0
     };
 
     try

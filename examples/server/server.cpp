@@ -17,12 +17,11 @@ int main()
     
     uint32_t countConnections = 10u;
 
-    net::addrinfo::SockSetting settings{
-        net::addrinfo::aifamily::inetv4,
-        net::addrinfo::aisocktype::stream,
-        net::addrinfo::aiprotocol::tcp,
-        net::addrinfo::aiflags::passive,
-        nullptr,
+    net::settings::server_t settings{
+        net::settings::aifamily::inetv4,
+        net::settings::aisocktype::stream,
+        net::settings::aiprotocol::tcp,
+        net::settings::aiflags::passive,
         countConnections
     };
 

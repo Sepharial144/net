@@ -81,15 +81,23 @@ namespace net {
 		};
 
 		// socket setting to pass into construtor of base socket
-		struct SockSetting {
+		struct server_t {
+			aifamily aiFamily;			// = aifamily::FAM_AF_INET;
+			aisocktype aiSocktype;		// = aisocktype::TYPE_SOCK_STREAM;
+			aiprotocol aiProtocol;		// = aiprotocol::PROTOCOL_TCP;
+			aiflags aiFlags;			// = aiflags::FLAG_AI_PASSIVE;
+			uint32_t countConnection;
+		};
+
+		struct connection_t
+		{
 			aifamily aiFamily;// = aifamily::FAM_AF_INET;
 			aisocktype aiSocktype;// = aisocktype::TYPE_SOCK_STREAM;
 			aiprotocol aiProtocol;// = aiprotocol::PROTOCOL_TCP;
 			aiflags aiFlags;// = aiflags::FLAG_AI_PASSIVE;
-#if defined(_WIN32) && !defined(linux)
-			::addrinfo* sockAddress;
-#endif
-			uint32_t countConnection;
+			#if defined(_WIN32) && !defined(linux)
+			WSADATA wsaData;
+			#endif
 		};
 
 		// connection setting to pass into construtor for client socket
@@ -110,30 +118,27 @@ namespace net {
 	};
 
 #if defined(_WIN32) && !defined(linux)
-
 	typedef SOCKET socket_t;
-
 #elif defined(linux) && !defined(_WIN32)
-
 	typedef int32_t socket_t;
-
 #endif
 
 #if defined(_WIN32) && !defined(linux)
-	socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port);
+	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
+	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port);
 #elif defined(linux) && !defined(_WIN32)
-	socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port);
+	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
 #endif
-	int32_t wait_connection(socket_t& sock_server, socket_t& sock_client, int32_t connections);
-	socket_t make_connection(settings::SockSetting& setting, const char* address, const char* port);
+	int32_t wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
+	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
 
-	int32_t read(socket_t& socket, char* data, size_t len);
-	int32_t write(socket_t& socket, const char* data, size_t len);
-	void shutdown(socket_t& socket, net::enumShutdown param);
+	int32_t read(net::socket_t& socket, char* data, size_t len);
+	int32_t write(net::socket_t& socket, const char* data, size_t len);
+	void shutdown(net::socket_t& socket, net::enumShutdown param);
 
-	void free(socket_t& socket);
+	void free(net::socket_t& socket);
 #if defined(_WIN32) && !defined(linux)
-	void free(socket_t& socket, ::addrinfo* sock_address);
+	void free(net::socket_t& socket, ::addrinfo* sock_address);
 	void release();
 #endif
 
@@ -147,10 +152,10 @@ namespace net {
 	class server final
 	{
 	public:
-		explicit server(const net::settings::SockSetting& settings,
+		explicit server(const net::settings::server_t& settings,
 			const int32_t port);
 
-		explicit server(const net::settings::SockSetting& settings,
+		explicit server(const net::settings::server_t& settings,
 			const char* addr,
 			const char* port);
 		~server();
@@ -161,7 +166,7 @@ namespace net {
 #if defined(_WIN32) && !defined(linux)
 		WSADATA m_wsaData;
 #endif
-		net::settings::SockSetting m_serverSetting;
+		net::settings::server_t m_serverSetting;
 		socket_t m_socket;
 		const char* m_address;
 		std::variant<int32_t, const char*> m_defaultPort;
@@ -222,4 +227,4 @@ namespace net {
 
 } // !namespace net
 
-#endif // !_NET_HPP
+#endif // !_NET_HPP_

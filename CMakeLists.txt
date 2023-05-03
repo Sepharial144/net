@@ -11,9 +11,9 @@ if(WIN32)
     message(STATUS "Target os: win32")
     set(TARGET_OS "win")
 
-    #find_library(WSOCK32_LIBRARY wsock32.lib)
-    #find_library(WS2_32_LIBRARY ws2_32.lib)
-    #find_library(ADVAPI32_LIBRARY AdvApi32.lib)
+    find_library(WSOCK32_LIBRARY wsock32.lib)
+    find_library(WS2_32_LIBRARY ws2_32.lib)
+    find_library(ADVAPI32_LIBRARY AdvApi32.lib)
 
     #message(STATUS "Library: ${WSOCK32_LIBRARY} ${WS2_32_LIBRARY} ${ADVAPI32_LIBRARY}" )
 
@@ -67,8 +67,8 @@ message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 add_subdirectory(tests)
 
-#add_subdirectory("examples/client")
-#add_subdirectory("examples/server")
+add_subdirectory("examples/client")
+add_subdirectory("examples/server")
 add_subdirectory("examples/${TARGET_OS}/tcp_server")
 add_subdirectory("examples/${TARGET_OS}/tcp_client")
 

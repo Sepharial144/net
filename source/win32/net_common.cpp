@@ -4,7 +4,7 @@
 
 namespace net
 {
-	socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port)
+	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -32,8 +32,51 @@ namespace net
 		return sockServer;
 	}
 
+	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port)
+	{
+		std::cout << "Server initializing ..." << &std::endl;
+
+		WSADATA wsaData = { 0 };
+		net::api::initializeWSA(wsaData);
+
+		struct addrinfo hints = { 0 };
+		struct addrinfo* pAddrInfo = nullptr;
+
+		ZeroMemory(&hints, sizeof(hints));
+		hints.ai_family = setting.aiFamily;
+		hints.ai_socktype = setting.aiSocktype;
+		hints.ai_protocol = setting.aiProtocol;
+		hints.ai_flags = setting.aiFlags; // investigate this value
+
+
+		// TODO: implement certain address
+		std::cout << "Server get addrinfo ... " << &std::endl;
+		int32_t ret = ::getaddrinfo(nullptr, port, &hints, &pAddrInfo);
+		net::throw_exception_on(ret != 0, "Netlib: server get addrinfo failed");
+		std::cout << "Server get addrinfo ... complete" << &std::endl;
+
+		socket_t sockServer = ::socket(pAddrInfo->ai_family, pAddrInfo->ai_socktype, pAddrInfo->ai_protocol);
+		if (sockServer == INVALID_SOCKET)
+		{
+			::freeaddrinfo(pAddrInfo);
+			::WSACleanup();
+			throw net::exception("Netlib: server create socket failed");
+		}
+
+		ret = ::bind(sockServer, pAddrInfo->ai_addr, pAddrInfo->ai_addrlen);
+		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server bind failed");
+
+		ret = ::listen(sockServer, SOMAXCONN);
+		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server listening failed");
+
+		::freeaddrinfo(pAddrInfo);
+		std::cout << "Server initializing ... complete" << &std::endl;
+
+		return sockServer;
+	}
+
 	//TODO: implement hash of client
-	int32_t wait_connection(socket_t& sock_server, socket_t& sock_client, int32_t connections)
+	int32_t wait_connection(net::socket_t& sock_server, net::socket_t& sock_client, int32_t connections)
 	{
 		std::cout << "Server wait connection ... " << &std::endl;
 		//TODO: implement throw error when client in valid
@@ -57,12 +100,12 @@ namespace net
 	}
 
 	//TODO: fix int port to char
-	socket_t make_connection(settings::SockSetting& setting, const char* address, const char* port)
+	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port)
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
 
-		WSADATA wsaData = { 0 };
-		net::api::initializeWSA(wsaData);
+		//WSADATA wsaData = { 0 };
+		net::api::initializeWSA(setting.wsaData);
 
 		struct addrinfo hints = { 0 };
 		struct addrinfo* sockAddress = nullptr;
@@ -74,8 +117,9 @@ namespace net
 
 		// TODO: check getaddrinfo is correct
 		std::cout << "Connection: get addrinfo ..." << &std::endl;
-		int32_t ret = ::getaddrinfo(nullptr, port, &hints, &setting.sockAddress);
+		int32_t ret = ::getaddrinfo(nullptr, port, &hints, &sockAddress);
 		net::throw_exception_on(ret != 0, "Netlib: connection getaddrinfo failed");
+		net::throw_exception_on(sockAddress == nullptr, "Netlib: connection sockaddress is null");
 		std::cout << "Connection: get addrinfo ... complete" << &std::endl;
 
 		std::cout << "Connection: create socket ..." << &std::endl;
@@ -84,9 +128,7 @@ namespace net
 										   sockAddress->ai_protocol);
 		if (sockConnection == INVALID_SOCKET)
 		{
-			if (setting.sockAddress != nullptr)
-				::freeaddrinfo(setting.sockAddress);
-			setting.sockAddress = nullptr;
+			api::releaseAddrinfo(sockAddress);
 			throw net::exception("Netlib: connection create socket failed");
 		}
 		std::cout << "Connection: create socket ... complete" << &std::endl;
@@ -97,9 +139,7 @@ namespace net
 			                            sockAddress->ai_addrlen);
 		if (ret == SOCKET_ERROR);
 		{
-			if (setting.sockAddress != nullptr)
-				::freeaddrinfo(setting.sockAddress);
-			setting.sockAddress = nullptr;
+			api::releaseAddrinfo(sockAddress);
 			throw net::exception("Netlib: connection failed");
 		}
 
@@ -109,17 +149,17 @@ namespace net
 		return sockConnection;
 	}
 
-	int32_t read(socket_t& socket, char* data, size_t len)
+	int32_t read(net::socket_t& socket, char* data, size_t len)
 	{
 		return ::recv(socket, data, len, 0);
 	}
 
-	int32_t write(socket_t& socket, const char* data, size_t len)
+	int32_t write(net::socket_t& socket, const char* data, size_t len)
 	{
 		return ::send(socket, data, len, 0);
 	}
 
-	void shutdown(socket_t& socket, net::enumShutdown param)
+	void shutdown(net::socket_t& socket, net::enumShutdown param)
 	{
 		// TODO: check different calls 
 		std::cout << "shutdown socket ... " << &std::endl;
@@ -128,7 +168,7 @@ namespace net
 		std::cout << "shutdown socket ... complete" << &std::endl;
 	}
 
-	void free(socket_t& socket)
+	void free(net::socket_t& socket)
 	{
 		std::cout << "Close socket ..." << &std::endl;
 		if (socket != INVALID_SOCKET)
@@ -140,7 +180,7 @@ namespace net
 		std::cout << "Close socket ... complete" << &std::endl;
 	}
 
-	void free(socket_t& socket, ::addrinfo* sock_address)
+	void free(net::socket_t& socket, ::addrinfo* sock_address)
 	{
 		std::cout << "Close socket ..." << &std::endl;
 		if (sock_address != nullptr)

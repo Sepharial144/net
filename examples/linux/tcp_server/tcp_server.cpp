@@ -12,7 +12,7 @@ int main()
     const char* address = "127.0.0.1";
     int32_t port = 3000;
 
-    net::settings::SockSetting settings{
+    net::settings::server_t settings{
         net::settings::aifamily::inetv4,
         net::settings::aisocktype::stream,
         net::settings::aiprotocol::tcp,

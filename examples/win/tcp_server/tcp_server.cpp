@@ -12,12 +12,11 @@ int main()
     const char* address = "127.0.0.1";
     int32_t port = 3000;
 
-    net::settings::SockSetting settings{
+    net::settings::server_t settings{
         net::settings::aifamily::inetv4,
         net::settings::aisocktype::stream,
         net::settings::aiprotocol::tcp,
         net::settings::aiflags::passive,
-        nullptr,
         10ul
     };
 
@@ -49,7 +48,7 @@ int main()
             }
         }
         std::cout << "Close server ... " << &std::endl;
-        net::free(tcp_server, settings.sockAddress);
+        //net::free(tcp_server, settings.sockAddress);
         net::free(tcp_server);
         std::cout << "Close server ... complete" << &std::endl;
         std::cout << "Close connection ... " << &std::endl;

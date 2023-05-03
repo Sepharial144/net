@@ -4,7 +4,7 @@
 
 namespace net { 
 
-    socket_t make_server(settings::SockSetting& setting, const char* address, int32_t port)
+    socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -32,7 +32,7 @@ namespace net {
 	}
 
 	//TODO: implement hash of client
-	int32_t wait_connection(socket_t& sock_server, socket_t& sock_client, int32_t connections)
+	int32_t wait_connection(net::socket_t& sock_server, net::socket_t& sock_client, int32_t connections)
 	{
 		std::cout << "Server wait connection ... " << &std::endl;
 		//TODO: implement throw error when client in valid
@@ -56,7 +56,7 @@ namespace net {
 	}
 
     	//TODO: fix int port to char
-	socket_t make_connection(settings::SockSetting& setting, const char* address, const char* port)
+	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port)
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
 
@@ -74,17 +74,17 @@ namespace net {
         return sockConnection;
 	}
 
-    int32_t read(socket_t& socket, char* data, size_t len)
+    int32_t read(net::socket_t& socket, char* data, size_t len)
 	{
 		return ::recv(socket, data, len, 0);
 	}
 
-	int32_t write(socket_t& socket, const char* data, size_t len)
+	int32_t write(net::socket_t& socket, const char* data, size_t len)
 	{
 		return ::send(socket, data, len, 0);
 	}
 
-	void shutdown(socket_t& socket, net::enumShutdown param)
+	void shutdown(net::socket_t& socket, net::enumShutdown param)
 	{
 		// TODO: check different calls 
 		std::cout << "shutdown socket ... " << &std::endl;
@@ -93,7 +93,7 @@ namespace net {
 		std::cout << "shutdown socket ... complete" << &std::endl;
 	}
 
-	void free(socket_t& socket)
+	void free(net::socket_t& socket)
 	{
 		std::cout << "Close socket ..." << &std::endl;
 		if (socket != 0)
@@ -105,7 +105,7 @@ namespace net {
 		std::cout << "Close socket ... complete" << &std::endl;
 	}
 
-    server::server(const net::settings::SockSetting& settings, const int32_t port)
+    server::server(const net::settings::server_t& settings, const int32_t port)
 		: m_serverSetting{ settings }
 		, m_socket{ 0 }
 		, m_address{ nullptr }
@@ -113,7 +113,7 @@ namespace net {
 	{
     }
 
-    server::server(const net::settings::SockSetting& settings, const char* addr, const char* port)
+    server::server(const net::settings::server_t& settings, const char* addr, const char* port)
 		: m_serverSetting{ settings }
 		, m_socket{ 0 }
 		, m_address{ addr }
