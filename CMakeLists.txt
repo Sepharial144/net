@@ -67,8 +67,11 @@ message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 add_subdirectory(tests)
 
-add_subdirectory("examples/client")
-add_subdirectory("examples/server")
+if(WIN32)
+    add_subdirectory("examples/client")
+    add_subdirectory("examples/server")
+endif()
+
 add_subdirectory("examples/${TARGET_OS}/tcp_server")
 add_subdirectory("examples/${TARGET_OS}/tcp_client")
 
