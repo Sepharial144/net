@@ -23,7 +23,7 @@ TEST_F(TCPTest, TCPCommunication)
 		std::array<char, 1024ul> serverRequest = { 0 };
 		std::array<char, 1024ul> clientRequest = { 0 };
 
-		constexpr int32_t messageLimit = 5;
+		constexpr int32_t messageLimit = 50;
 		int32_t serverCountMessage = 0;
 		int32_t clientCountMessage = 0;
 
@@ -40,7 +40,6 @@ TEST_F(TCPTest, TCPCommunication)
 
 				while(true)
 				{
-					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					if (int32_t ret = net::read(tcp_client, serverRequest.data(), serverRequest.size()))
 					{
 						ret = net::write(tcp_client, serverRequest.data(), ret);
@@ -62,10 +61,8 @@ TEST_F(TCPTest, TCPCommunication)
 
 			while (true)
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				if (int32_t ret = net::read(tcp_connection, clientRequest.data(), clientRequest.size()))
 				{
-					std::cout << "client:" << clientRequest.data() << std::endl;
 					clientCountMessage++;
 					if (clientCountMessage == messageLimit)
 						break;
@@ -84,7 +81,8 @@ TEST_F(TCPTest, TCPCommunication)
 
 		EXPECT_EQ(serverCountMessage, messageLimit);
 		EXPECT_EQ(clientCountMessage, messageLimit);
-	}() ));
+	}
+	()));
 }
 
 TEST(TestSecond, TestSecond) {
