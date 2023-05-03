@@ -37,7 +37,7 @@ int main()
             while(true)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                if (int32_t ret = read(tcp_client, request.data(), request.size()))
+                if (int32_t ret = net::read(tcp_client, request.data(), request.size()))
                 {
                     std::cout << "Request: " << request.data() << " " << ret << &std::endl;
                     ret = net::write(tcp_client, request.data(), ret);
