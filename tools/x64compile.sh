@@ -1,2 +1,2 @@
 #!/bin/bash
-cmake -Bbuild && cmake --build build
+cmake -Bbuild && cmake --build build -j4
