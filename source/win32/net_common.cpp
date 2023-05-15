@@ -175,7 +175,7 @@ namespace net
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
 
-		ret = ::getaddrinfo(nullptr, port, &hints, &sockAddress);
+		int32_t ret = ::getaddrinfo(nullptr, port, &hints, &sockAddress);
 		net::throw_exception_on(ret != 0, "Netlib: async connection getaddrinfo failed");
 		net::throw_exception_on(sockAddress == nullptr, "Netlib: async connection sockaddress is null");
 
@@ -188,8 +188,8 @@ namespace net
 			throw net::exception("Netlib: connection create socket failed");
 		}
 
-		uint64_t nonBlockMode = 1;
-		ret = ioctlsocket(sockConnection, FIONBIO, &nonBlockMode);
+		u_long nonBlockMode = 1;
+		ret = ::ioctlsocket(sockConnection, FIONBIO, &nonBlockMode);
 		if (ret == SOCKET_ERROR)
 		{
 			api::releaseAddrinfo(sockAddress);
@@ -210,13 +210,13 @@ namespace net
 	int64_t  poll_read(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout)
 	{
 		poll_array.events = POLLRDNORM;
-		return ret = ::WSAPoll(poll_array, socket_fd, timeout);
+		return ::WSAPoll(&poll_array, socket_fd, timeout);
 	}
 
 	int64_t poll_write(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout)
 	{
 		poll_array.events = POLLWRNORM;
-		return ::WSAPoll(poll_array, socket_fd, timeout);
+		return ::WSAPoll(&poll_array, socket_fd, timeout);
 	}
 
 	void shutdown(net::socket_t& socket, net::enumShutdown param)

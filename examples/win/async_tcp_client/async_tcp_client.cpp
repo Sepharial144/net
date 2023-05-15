@@ -24,13 +24,14 @@ int main(int argc, char* argv[])
 
         std::array<char, 1024ul> request = { 0 };
         net::pollfd_t fdArray = {0};
-        pollfd_t fdArray.fd = tcp_connection;
+        fdArray.fd = tcp_connection;
         
         //fdarray.events = POLLWRNORM;
         //ret = ::WSAPoll(&fdArray, 1, DEFAULT_WAIT);
         //net::throw_exception_on(ret == SOCKET_ERROR, "WsaPoll write failed");
+        std::string message{ "Super Message!" };
 
-        if(int32t ret = net::poll_read(fdArray, 1, 30000))
+        if(int32_t ret = net::poll_read(fdArray, 1, 30000))
         {
             std::cout << "Connection established ... " << argv[1] << ":" <<argv[2] << &std::endl;
             std::cout << "send data ... " << argv[1] << ":" <<argv[2] << std::endl;
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
         int32_t timeout = 0;
         while(true)
         {
-            if(int32t ret = net::poll_read(fdArray, 1, timeout))
+            if(int32_t ret = net::poll_read(fdArray, 1, timeout))
             {
                 std::cout << "read ... " << &std::endl;
                 ret = net::read(tcp_connection, request.data(), request.size());
@@ -53,7 +54,7 @@ int main(int argc, char* argv[])
                 std::cout << "read ... error ... " << ret << &std::endl;
             }
 
-            if(int32t ret = net::poll_write(fdArray, 1, timeout))
+            if(int32_t ret = net::poll_write(fdArray, 1, timeout))
             {
                 std::cout << "write ... " << &std::endl;
                 ret = net::write(tcp_connection, request.data(), request.size());
@@ -61,7 +62,10 @@ int main(int argc, char* argv[])
                 std::memset(request.data(), 0, request.size());
                 continue;
             }
-            std::cout << "write ... error ... " << ret << &std::endl;
+            else
+            {
+                std::cout << "write ... error ... " << ret << &std::endl;
+            }
         }
 
 /*

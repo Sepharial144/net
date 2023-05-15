@@ -70,7 +70,7 @@ add_subdirectory(tests)
 if(WIN32)
     add_subdirectory("examples/client")
     add_subdirectory("examples/server")
-    add_subdirectory("examples/${TARGET_OS}/async_tcp_server")
+    add_subdirectory("examples/${TARGET_OS}/async_tcp_client")
 endif()
 
 add_subdirectory("examples/${TARGET_OS}/tcp_server")
