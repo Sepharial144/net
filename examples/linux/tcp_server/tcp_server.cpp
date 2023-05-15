@@ -23,7 +23,7 @@ int main()
     try
     {
         net::socket_t tcp_server = net::make_server(settings, address, port);
-        net::socket_t tcp_client;
+        net::socket_t tcp_client = {0};
         
         if (net::wait_connection(tcp_server, tcp_client, 10))
         {
