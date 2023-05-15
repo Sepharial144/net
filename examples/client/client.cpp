@@ -5,18 +5,15 @@
 #include <array>
 #include <cstdint>
 
-int main()
+int main(int argc, char* argv[])
 {
-    const char* address = "127.0.0.1";
-    const char* port = "3000";
-
     constexpr size_t defaultLen = 1024ul;
     std::array<char, defaultLen> request = {0};
     std::string message = "Echo message";
 
     try
     {
-        net::connection tcp_client(address, port);
+        net::connection tcp_client(argv[1], argv[2]);
         if (tcp_client.connect())
         {
             size_t len = message.size();

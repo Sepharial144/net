@@ -6,7 +6,7 @@
 
 using namespace net;
 
-int main()
+int main(int argc, char* argv[])
 {
     const char* address = "127.0.0.1";
     //const char* port = "3000";

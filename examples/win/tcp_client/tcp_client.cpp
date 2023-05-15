@@ -7,11 +7,8 @@
 #include <thread>
 #include <chrono>
 
-int main()
+int main(int argc, char* argv[])
 {
-    const char* address = "127.0.0.1";
-    const char* port = "3001";
-
     net::settings::connection_t settings{
         net::settings::aifamily::inetv4,
         net::settings::aisocktype::stream,
@@ -22,7 +19,7 @@ int main()
 
     try
     {
-        net::socket_t tcp_connection = net::make_connection(settings, address, port);
+        net::socket_t tcp_connection = net::make_connection(settings, argv[1], argv[2]);
         std::array<char, 1024ul> request = { 0 };
 
         int32_t count = 0;
