@@ -42,10 +42,11 @@ namespace net {
 			appletalk = AF_APPLETALK,
 			inetv6 = AF_INET6,			// The Internet Protocol version 6 (IPv6)address family.
 			irda = AF_IRDA,				// The Infrared Data Association(IrDA) address family.This address family is only supported if the computer has an infrared portand driver installed.
-			#if defined(_WIN32) && !defined(linux)
+
+#if defined(_WIN32) && !defined(linux)
 			netbios = AF_NETBIOS,
 			bluetooth = AF_BTH,			// The Bluetooth address family.This address family is only supported if a Bluetooth adapter is installed on Windows Server 2003 or later.
-			#endif
+#endif
 		};
 
 		enum aisocktype : int32_t {
@@ -71,13 +72,14 @@ namespace net {
 			all = AI_ALL,
 			addrconfig = AI_ADDRCONFIG,
 			v4mapped = AI_V4MAPPED,
-			#if defined(_WIN32) && !defined(linux)
+
+#if defined(_WIN32) && !defined(linux)
 			authoritative = AI_NON_AUTHORITATIVE,
 			secure = AI_SECURE,
 			return_prefered_names = AI_RETURN_PREFERRED_NAMES,
 			fqdn = AI_FQDN,
 			fileserver = AI_FILESERVER
-			#endif
+#endif
 		};
 
 		// socket setting to pass into construtor of base socket
@@ -95,6 +97,7 @@ namespace net {
 			aisocktype aiSocktype;// = aisocktype::TYPE_SOCK_STREAM;
 			aiprotocol aiProtocol;// = aiprotocol::PROTOCOL_TCP;
 			aiflags aiFlags;// = aiflags::FLAG_AI_PASSIVE;
+
 			#if defined(_WIN32) && !defined(linux)
 			WSADATA wsaData;
 			#endif
