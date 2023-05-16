@@ -139,8 +139,8 @@ namespace net {
 
 	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
 	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port);
-	int64_t  poll_read(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout);
-	int64_t poll_write(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout);
+	int64_t  poll_read(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout);
+	int64_t poll_write(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout);
 
 	int32_t read(net::socket_t& socket, char* data, size_t len);
 	int32_t write(net::socket_t& socket, const char* data, size_t len);

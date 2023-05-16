@@ -188,7 +188,7 @@ namespace net
 			throw net::exception("Netlib: connection create socket failed");
 		}
 
-		unit64_t nonBlockMode = 1;
+		uint64_t nonBlockMode = 1;
 		ret = ioctlsocket(sockConnection, FIONBIO, &nonBlockMode);
 		if (ret == SOCKET_ERROR)
 		{
@@ -207,13 +207,13 @@ namespace net
         return sockConnection;
 	}
 
-	int64_t  poll_read(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout)
+	int64_t  poll_read(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout)
 	{
 		poll_array.events = POLLRDNORM;
 		return ret = ::WSAPoll(poll_array, socket_fd, timeout);
 	}
 
-	int64_t poll_write(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout)
+	int64_t poll_write(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout)
 	{
 		poll_array.events = POLLWRNORM;
 		return ::WSAPoll(poll_array, socket_fd, timeout);
