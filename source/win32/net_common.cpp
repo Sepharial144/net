@@ -149,14 +149,74 @@ namespace net
 		return sockConnection;
 	}
 
+
 	int32_t read(net::socket_t& socket, char* data, size_t len)
 	{
 		return ::recv(socket, data, len, 0);
 	}
 
+
 	int32_t write(net::socket_t& socket, const char* data, size_t len)
 	{
 		return ::send(socket, data, len, 0);
+	}
+
+
+	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port)
+	{
+		std::cout << "Connection asynchronous initialization ..." << &std::endl;
+
+		net::api::initializeWSA(setting.wsaData);
+
+		struct addrinfo hints = { 0 };
+		struct addrinfo* sockAddress = nullptr;
+
+		hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+
+		ret = ::getaddrinfo(nullptr, port, &hints, &sockAddress);
+		net::throw_exception_on(ret != 0, "Netlib: async connection getaddrinfo failed");
+		net::throw_exception_on(sockAddress == nullptr, "Netlib: async connection sockaddress is null");
+
+		socket_t sockConnection = ::socket(sockAddress->ai_family, 
+										   sockAddress->ai_socktype, 
+										   sockAddress->ai_protocol);
+		if (sockConnection == INVALID_SOCKET)
+		{
+			api::releaseAddrinfo(sockAddress);
+			throw net::exception("Netlib: connection create socket failed");
+		}
+
+		unit64_t nonBlockMode = 1;
+		ret = ioctlsocket(sockConnection, FIONBIO, &nonBlockMode);
+		if (ret == SOCKET_ERROR)
+		{
+			api::releaseAddrinfo(sockAddress);
+			throw_exception_on(ret == SOCKET_ERROR, "Netlib: connection ioscl call error");
+		}
+
+		ret = ::connect(sockConnection, sockAddress->ai_addr, sockAddress->ai_addrlen);
+		if (ret == SOCKET_ERROR);
+		{
+			api::releaseAddrinfo(sockAddress);
+			throw net::exception("Netlib: connection failed");
+		}
+
+        std::cout << "Connection asynchronous initialization ... complete" << &std::endl;
+        return sockConnection;
+	}
+
+	int64_t  poll_read(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout)
+	{
+		poll_array.events = POLLRDNORM;
+		return ret = ::WSAPoll(poll_array, socket_fd, timeout);
+	}
+
+	int64_t poll_write(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout)
+	{
+		poll_array.events = POLLWRNORM;
+		return ::WSAPoll(poll_array, socket_fd, timeout);
 	}
 
 	void shutdown(net::socket_t& socket, net::enumShutdown param)

@@ -122,9 +122,12 @@ namespace net {
 
 #if defined(_WIN32) && !defined(linux)
 	typedef SOCKET socket_t;
+	typedef WSAPOLLFD pollfd_t;
 #elif defined(linux) && !defined(_WIN32)
 	typedef int32_t socket_t;
+	typedef int32_t pollfd_t;
 #endif
+
 
 #if defined(_WIN32) && !defined(linux)
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
@@ -133,7 +136,11 @@ namespace net {
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
 #endif
 	int32_t wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
+
 	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
+	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port);
+	int64_t  poll_read(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout);
+	int64_t poll_write(pollfd_t& poll_array, unit64_t socket_fd, int64_t timeout);
 
 	int32_t read(net::socket_t& socket, char* data, size_t len);
 	int32_t write(net::socket_t& socket, const char* data, size_t len);
