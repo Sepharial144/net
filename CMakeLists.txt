@@ -73,6 +73,10 @@ if(WIN32)
     add_subdirectory("examples/${TARGET_OS}/async_tcp_client")
 endif()
 
+if(UNIX)
+    add_subdirectory("examples/${TARGET_OS}/async_tcp_server")
+endif()
+
 add_subdirectory("examples/${TARGET_OS}/tcp_server")
 add_subdirectory("examples/${TARGET_OS}/tcp_client")
 

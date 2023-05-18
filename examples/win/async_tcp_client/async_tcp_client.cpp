@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
         net::socket_t tcp_connection = net::make_async_connection(settings, argv[1], argv[2]);
 
         std::array<char, 1024ul> request = { 0 };
-        net::pollfd_t fdArray = {0};
+        net::pollfd_s fdArray = {0};
         fdArray.fd = tcp_connection;
         
         //fdarray.events = POLLWRNORM;

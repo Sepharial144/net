@@ -23,20 +23,25 @@ int main()
     {
         net::socket_t tcp_connection = net::make_connection(settings, address, port);
         std::array<char, 1024ul> request = { 0 };
-
+        std::string message{"init string"};
         int32_t count = 0;
+
+        int32_t ret = net::write(tcp_connection, message.data(), message.size());
+        if (ret)
+            std::cout << "Request sent: " << message.data() << " " << ret << &std::endl;
+        count++;
         while (true)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(40));
             if (int32_t ret = net::read(tcp_connection, request.data(), request.size()))
             {
-                ++count;
-                std::cout << "Request: " << request.data() << " " << ret << &std::endl;
                 if (count == 2)
                     break;
+                std::cout << "Request: " << request.data() << " " << ret << &std::endl;
                 ret = net::write(tcp_connection, request.data(), ret);
                 if (ret)
                     std::cout << "Request sent: " << request.data() << " " << ret << &std::endl;
+                ++count;
             }
         }
         std::cout << "Connection close ..." << &std::endl;

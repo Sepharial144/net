@@ -11,10 +11,10 @@ namespace net {
 		if (port < static_cast<int32_t>(0))
 			throw std::logic_error("Netlib: server port should not be negative");
 
-        struct sockaddr_in addr = { 0 };
         socket_t sockServer = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
         net::throw_exception_on(sockServer < 0, "Netlib: server create socket failed");
 
+		struct sockaddr_in addr = { 0 };
         addr.sin_family = setting.aiFamily;
         addr.sin_port = ::htons(port);
         // TODO: create for certain address macro
@@ -53,6 +53,41 @@ namespace net {
 
 		std::cout << "Server got connection socket id ... " << sock_client << &std::endl;
 		return 1;
+	}
+
+	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port)
+	{
+		std::cout << "Asynchronous server initializing ..." << &std::endl;
+
+		if (port < static_cast<int32_t>(0))
+			throw std::logic_error("Netlib: server port should not be negative");
+
+        socket_t sockServer = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
+        net::throw_exception_on(sockServer < 0, "Netlib: asynchronous server create socket failed");
+
+		int32_t on = 1;
+		int32_t ret = ::setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
+		net::throw_exception_on(ret < 0, "Netlib: asynchronous server set socket option failed");
+		
+		int32_t nonBlockParam = 1;
+		ret = ::ioctl(sockServer, FIONBIO, &nonBlockParam);
+		net::throw_exception_on(ret < 0, "Netlib: asynchronous server ioctl call failed");
+
+		struct sockaddr_in addr = { 0 };
+        addr.sin_family = setting.aiFamily;
+        addr.sin_port = ::htons(port);
+        // TODO: create for certain address macro
+        addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
+
+        ret = ::bind(sockServer, (struct sockaddr*)&addr, sizeof(addr));
+        net::throw_exception_on(ret < 0, "Netlib: server bind failed");
+
+        ret = ::listen(sockServer, 1);
+        net::throw_exception_on(ret < 0, "Netlib: server listening failed");
+
+        std::cout << "Asynchronous server initializing ... complete" << &std::endl;
+
+        return sockServer;
 	}
 
     	//TODO: fix int port to char
@@ -103,6 +138,17 @@ namespace net {
 			net::throw_exception_on(ret < 0, "Netlib: close failed");
 		}
 		std::cout << "Close socket ... complete" << &std::endl;
+	}
+
+	void set_pollfd(net::pollfd_s& pollfd_array, uint64_t array_len, net::poll_param param)
+	{
+		for(size_t i = 0ul; 0 < array_len; ++i)
+			pollfd_array[i].events = param;
+	}
+
+	int32_t poll(net::pollfd_s& pollfd_array, uint64_t array_len, int64_t timeout)
+	{
+		return ::poll(pollfd_array, array_len, timeout);
 	}
 
     server::server(const net::settings::server_t& settings, const int32_t port)

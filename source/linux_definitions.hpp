@@ -10,6 +10,8 @@
 	// linux
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <poll.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <unistd.h>

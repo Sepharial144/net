@@ -26,6 +26,48 @@
 #endif
 
 namespace net {
+
+
+	// TODO: impleemnt for windows
+	enum status: int16_t
+	{
+		error = -1,
+		disconnected = 0
+	};
+
+	enum socket: int16_t
+	{
+		blocking = 0,
+		nonblocking = 1
+	}
+
+
+	// for linux
+	enum poll_param: int16_t
+	{
+		in = POLLIN,
+		prioriry = POLLPRI,
+		out = POLLOUT,
+		error = POLLERR,
+		disconnected = POLLHUP,
+		notclose = POLLNVAL
+	}
+
+	// XPG4.2
+	enum xpoll_param
+	{
+		in 			= POLLRDNORM, // data could be read
+		in_prioriry = POLLRDBAND, // prioirory data could be read
+		out         = POLLWRNORM, // data could be write
+		out_prioriry = POLLWRBAND // prioirory data could be write
+	}
+
+	enum poll_timeout: int16_t
+	{
+		immediately = 0,
+		forever = -1
+	}
+
 	enum enumShutdown : int16_t
 	{
 		receive = NET_SOCKET_RECEIVE, // shutdown receive messages on socket
@@ -93,10 +135,10 @@ namespace net {
 
 		struct connection_t
 		{
-			aifamily aiFamily;// = aifamily::FAM_AF_INET;
-			aisocktype aiSocktype;// = aisocktype::TYPE_SOCK_STREAM;
-			aiprotocol aiProtocol;// = aiprotocol::PROTOCOL_TCP;
-			aiflags aiFlags;// = aiflags::FLAG_AI_PASSIVE;
+			aifamily aiFamily;     // = aifamily::FAM_AF_INET;
+			aisocktype aiSocktype; // = aisocktype::TYPE_SOCK_STREAM;
+			aiprotocol aiProtocol; // = aiprotocol::PROTOCOL_TCP;
+			aiflags aiFlags;       // = aiflags::FLAG_AI_PASSIVE;
 
 			#if defined(_WIN32) && !defined(linux)
 			WSADATA wsaData;
@@ -105,8 +147,8 @@ namespace net {
 
 		// connection setting to pass into construtor for client socket
 		struct ConnectionSetting {
-			aifamily aiFamily;// = aifamily::FAM_AF_INET;
-			const char* ip_address;// = "127.0.0.1";
+			aifamily aiFamily;      // = aifamily::FAM_AF_INET;
+			const char* ip_address; // = "127.0.0.1";
 			const char* port;
 			//int port;// = 0;
 		};
@@ -122,10 +164,13 @@ namespace net {
 
 #if defined(_WIN32) && !defined(linux)
 	typedef SOCKET socket_t;
-	typedef WSAPOLLFD pollfd_t;
+	typedef WSAPOLLFD pollfd_s;
 #elif defined(linux) && !defined(_WIN32)
 	typedef int32_t socket_t;
-	typedef int32_t pollfd_t;
+	typedef pollfd pollfd_s;
+
+	// TODO: implement with select
+	typedef fd_set fdset_s;
 #endif
 
 
@@ -134,15 +179,20 @@ namespace net {
 	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port);
 #elif defined(linux) && !defined(_WIN32)
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
+	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port);
 #endif
-	int32_t wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
+	int32_t  wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
+	int32_t  wait_async_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections)
 
 	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
 	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port);
-	int64_t  poll_read(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout);
-	int64_t poll_write(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout);
+	//int64_t  on_read(pollfd_s& poll_array, uint64_t socket_idx, int64_t timeout);
+	//int64_t on_write(pollfd_s& poll_array, uint64_t socket_idx, int64_t timeout);
+	
+	int32_t set_pollfd(net::pollfd_s& pollfd_array, uint64_t array_len, net::poll_param param);
+	int32_t poll(pollfd_s& pollfd_array, uint64_t array_len, int64_t timeout);
 
-	int32_t read(net::socket_t& socket, char* data, size_t len);
+	int32_t  read(net::socket_t& socket, char* data, size_t len);
 	int32_t write(net::socket_t& socket, const char* data, size_t len);
 	void shutdown(net::socket_t& socket, net::enumShutdown param);
 
