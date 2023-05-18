@@ -98,7 +98,8 @@ int main()
         {
             std::cout << "Clients poll call ..." << std::endl;
             //int32_t ret = ::poll((pollfd*)&fdArray, numFds, timeout);
-            int32_t ret = ::poll(fdArray, nfds, timeout);
+            //int32_t ret = ::poll(fdArray, nfds, timeout);
+            int32_t ret = net::poll(fdArray, nfds, timeout);
             if (ret == 0) 
             {
                 std::cout << "Clients poll call ... failed, timeout " << ret << " errno: "<< errno << std::endl;
@@ -162,13 +163,13 @@ int main()
                     if (ret < 0)
                     {
                         std::cout << "Write message ...  error: " << ret << " errno: " << errno <<&std::endl;
-                        net::free(currentPollFdfd);
+                        net::free(currentPollFd.fd);
                         break;
                     }
                     if (ret == net::status::disconnected)
                     {
                         std::cout << "Write message ... disconnected: " << ret << "errno: " << errno <<&std::endl;
-                        net::free(currentPollFdfd);
+                        net::free(currentPollFd.fd);
                         break;
                     }
                     haveMessage = false;

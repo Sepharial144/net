@@ -74,11 +74,10 @@ if(WIN32)
 endif()
 
 if(UNIX)
-    add_subdirectory("examples/${TARGET_OS}/async_tcp_server")
+    add_subdirectory("examples/${TARGET_OS}/tcp/block/server")
+    add_subdirectory("examples/${TARGET_OS}/tcp/block/client")
+    add_subdirectory("examples/${TARGET_OS}/tcp/nonblock/server")
 endif()
-
-add_subdirectory("examples/${TARGET_OS}/tcp_server")
-add_subdirectory("examples/${TARGET_OS}/tcp_client")
 
 # TODO: finish configure project
 # fix execution install folder, does not work

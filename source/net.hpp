@@ -27,7 +27,6 @@
 
 namespace net {
 
-
 	// TODO: impleemnt for windows
 	enum status: int16_t
 	{
@@ -35,38 +34,50 @@ namespace net {
 		disconnected = 0
 	};
 
-	enum socket: int16_t
-	{
-		blocking = 0,
-		nonblocking = 1
-	}
+	namespace socket {
+		enum type: int16_t
+		{
+			blocking = 0,
+			nonblocking = 1
+		};
+	} // namespace socket
 
 
-	// for linux
-	enum poll_param: int16_t
-	{
-		in = POLLIN,
-		prioriry = POLLPRI,
-		out = POLLOUT,
-		error = POLLERR,
-		disconnected = POLLHUP,
-		notclose = POLLNVAL
-	}
+#if defined(linux) && !defined(_WIN32)
+	namespace pollc {
 
-	// XPG4.2
-	enum xpoll_param
-	{
-		in 			= POLLRDNORM, // data could be read
-		in_prioriry = POLLRDBAND, // prioirory data could be read
-		out         = POLLWRNORM, // data could be write
-		out_prioriry = POLLWRBAND // prioirory data could be write
-	}
+		enum param: int16_t
+		{
+			in          = POLLIN,  // data could be read
+			prioriry    = POLLPRI, // prioirory data could be read
+			out         = POLLOUT, // write data would be nonblocking
+			pollerror   = POLLERR, // poll error
+			polldisconn = POLLHUP, // disconnected
+			notclose    = POLLNVAL // file descriptor is not closed
+		};
 
-	enum poll_timeout: int16_t
-	{
-		immediately = 0,
-		forever = -1
-	}
+		// XPG4.2
+		enum xparam: int16_t
+		{
+			xin 		 = POLLRDNORM, // data could be read
+			xin_prioriry = POLLRDBAND, // prioirory data could be read
+			xout         = POLLWRNORM, // data could be write
+			xout_prioriry = POLLWRBAND // prioirory data could be write
+		};
+
+		enum timeout: int16_t
+		{
+			immediately = 0,
+			forever = -1
+		};
+
+		enum poll_ret: int16_t
+		{
+			poll_timeout = 1,
+			poll_error = -1
+		} ;
+	} //namespace poll
+#endif
 
 	enum enumShutdown : int16_t
 	{
@@ -182,15 +193,17 @@ namespace net {
 	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port);
 #endif
 	int32_t  wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
-	int32_t  wait_async_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections)
+	int32_t  wait_async_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
 
 	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
 	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port);
 	//int64_t  on_read(pollfd_s& poll_array, uint64_t socket_idx, int64_t timeout);
 	//int64_t on_write(pollfd_s& poll_array, uint64_t socket_idx, int64_t timeout);
-	
-	int32_t set_pollfd(net::pollfd_s& pollfd_array, uint64_t array_len, net::poll_param param);
-	int32_t poll(pollfd_s& pollfd_array, uint64_t array_len, int64_t timeout);
+
+#if defined(linux) && !defined(_WIN32)	
+	void set_pollfd(net::pollfd_s pollfd_array[], uint64_t array_len, net::pollc::param param);
+	int32_t poll(net::pollfd_s* pollfd_array, uint64_t array_len, int64_t timeout);
+#endif
 
 	int32_t  read(net::socket_t& socket, char* data, size_t len);
 	int32_t write(net::socket_t& socket, const char* data, size_t len);

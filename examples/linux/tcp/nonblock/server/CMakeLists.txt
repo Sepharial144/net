@@ -6,7 +6,7 @@ message(STATUS "Configure ${TARGET}")
 message(STATUS "Path: ${DESTINATION_LIB}")
 message(STATUS "Include dir: ${NET_INCLUDE_DIR}")
 
-set(SERVER_EXAMPLE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/async_tcp_server.cpp")
+set(SERVER_EXAMPLE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/server.cpp")
 add_executable(${TARGET} ${SOURCE_DEPENDENCIES} ${SERVER_EXAMPLE_SRC})
 target_include_directories(${TARGET} PUBLIC "${DESTINATION_LIB}" "${NET_INCLUDE_DIR}")
 #target_link_directories(${TARGET} PUBLIC "${DESTINATION_LIB}/lib")

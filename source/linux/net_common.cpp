@@ -140,13 +140,13 @@ namespace net {
 		std::cout << "Close socket ... complete" << &std::endl;
 	}
 
-	void set_pollfd(net::pollfd_s& pollfd_array, uint64_t array_len, net::poll_param param)
+	void set_pollfd(net::pollfd_s pollfd_array[], uint64_t array_len, net::pollc::param param)
 	{
 		for(size_t i = 0ul; 0 < array_len; ++i)
 			pollfd_array[i].events = param;
 	}
 
-	int32_t poll(net::pollfd_s& pollfd_array, uint64_t array_len, int64_t timeout)
+	int32_t poll(net::pollfd_s* pollfd_array, uint64_t array_len, int64_t timeout)
 	{
 		return ::poll(pollfd_array, array_len, timeout);
 	}
