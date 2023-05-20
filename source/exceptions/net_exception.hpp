@@ -11,6 +11,9 @@ namespace net
     */
     void throw_exception_on(const bool is_error, const char* error);
     void throw_exception_on_poll(const int32_t ret_status, const char* call_placement);
+    void throw_exception_on_revents(const int32_t revent, 
+                                    const net::pollc::param exclude, 
+                                    const char* label_excep);
 
     /*
     * Exception

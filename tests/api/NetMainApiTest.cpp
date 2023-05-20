@@ -120,108 +120,58 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
         	serverSocketArray[0].events = net::pollc::in;
 
 			constexpr uint64_t timeout = 3 * 60 * 100; // wait 3 minute
-			int32_t ret = ::poll(serverSocketArray, 1, timeout);
-			if (ret == 0) 
-			{
-				std::cout << "Poll call ... timeout: " << ret << " errno: "<< errno << &std::endl; 
-				throw net::exception("Server poll call timout error");
-			}
-			if (ret == net::pollc::poll_error)
-			{
-				std::cout << "Poll call ... error: " << ret << " errno: "<< errno << &std::endl; 
-				throw net::exception("Server poll call error");
-			}
+			int32_t ret = net::poll(serverSocketArray, 1, timeout);
+			std::cout << "Server poll call ... " << &std::endl;
+			net::throw_exception_on_poll(ret, "Server poll call");
+			std::cout << "Server poll call ... complete" << &std::endl;
 
-			std::cout << "Poll call ... complete" << &std::endl;
-
-			std::cout << "Check server events ..." << std::endl;
+			std::cout << "Server check revents ..." << &std::endl;
 			int32_t retEvents = serverSocketArray[0].revents;
+			net::throw_exception_on_revents(retEvents, net::pollc::in, "Server check revents ...");
+			std::cout << "Server check revents ... complete" << &std::endl;
 
-			if (retEvents == 0)
-			{
-				std::cout << "Check server events ... good" << std::endl;
-				throw net::exception("Server unexpected error");
-			}
+			std::cout << "Accept connection ..." << &std::endl;
 
-			if (retEvents != net::pollc::in)
-			{
-				// error revent retEvents
-				std::cout << "Check server events ... revent error: " << retEvents << std::endl;
-				serverIsRun = false;
-				throw net::exception("Server revent error");
-			}
-			std::cout << "Check server events ... complete" << std::endl;
-
-			std::cout << "Accept connection ..." << std::endl;
-			net::socket_t tcp_client = ::accept(tcp_server, nullptr, nullptr);
-			if (tcp_client < 0)
-			{
-				std::cout << "Accept connection ... fail" << std::endl;
-				if (errno != EWOULDBLOCK)
-				{
-					// error
-					std::cout << "Accept connection ...error" << std::endl;
-					serverIsRun = false;
-					throw net::exception("Server accept connection error");
-				}
-				throw net::exception("Server accept unexpected error");
-			}
+			net::socket_t tcp_client  = {0};
+			ret = net::wait_async_connection(tcp_server, tcp_client , 10);
+			net::throw_exception_on(ret == 0, "Accept connection ... failed");
 
 			fdArray[currentSocketFd].fd = tcp_client;
         	fdArray[currentSocketFd].events = net::pollc::in;
 			++countClientFd;
 			++nfds;
 			net::free(tcp_server);
-			std::cout << "Accept connection ... complete" << std::endl;
-			std::cout << "Server is running ..." << std::endl;
+			std::cout << "Accept connection ... complete" << &std::endl;
+			std::cout << "Server is running ..." << &std::endl;
 
 			bool haveMessage = false;
 
 			while(serverIsRun == true)
 			{
-				std::cout << "Clients poll call ..." << std::endl;
+				std::cout << "Clients poll call ..." << &std::endl;
 
 				int32_t ret = net::poll(fdArray, nfds, timeout);
-				if (ret == 0) 
-				{
-					std::cout << "Clients poll call ... failed, timeout " << ret << " errno: "<< errno << std::endl;
-					break;
-				}
-				if (ret == net::pollc::poll_error)
-				{
-					std::cout << "Clients poll call ... failed, got error " << ret << " errno: "<< errno << &std::endl; 
-					break;
-				}
+				net::throw_exception_on_poll(ret, "Clients poll call ...");
 				std::cout << "Call clients poll ... complete" << &std::endl;
 
 
 				for(size_t i = 0ul; i < nfds; ++i)
 				{
 					net::pollfd_s currentPollFd = fdArray[i];
-					std::cout << "Check client events ... socket idx: " << i << &std::endl;
-
-					std::cout << "Returned event: " << currentPollFd.revents << std::endl;
-
-					if (currentPollFd.revents == 0)
-						std::cout << "Check client events ... is good: " << currentPollFd.revents << &std::endl;
-
-					if (currentPollFd.revents != net::pollc::in)
-					{
-						std::cout << "Check client events ... error: " << currentPollFd.revents << &std::endl;
-						serverIsRun = false;
-						break;
-					}
-					std::cout << "Check client events ... complete" << &std::endl;
+					std::cout << "Client revents ... socket idx: " << i << &std::endl;
+					std::cout << "Client revents ... returned event: " << currentPollFd.revents << &std::endl;
+					net::throw_exception_on_revents(currentPollFd.revents, net::pollc::in, "Client revents ...");
+					std::cout << "Client revents ... complete" << &std::endl;
 
 					do 
 					{
 						if (!haveMessage)
 						{
-							std::cout << "Read message ..." << std::endl;
+							std::cout << "Read message ..." << &std::endl;
 							ret = net::read(currentPollFd.fd, serverRequest.data(), serverRequest.size());
 							if (ret > 0)
 							{
-								std::cout << "Read message ... complete, ret status: " << ret << " " << serverRequest.data() << " len: " << ret << std::endl;
+								std::cout << "Read message ... complete, ret status: " << ret << " " << serverRequest.data() << " len: " << ret << &std::endl;
 								serverCountMessage++;
 								haveMessage = true;
 								continue;
@@ -229,6 +179,9 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 
 							if (ret < 0)
 							{
+								if (errno == NET_SOCKET_EAGAIN  || errno == NET_SOCKET_WOULD_BLOCK)
+									continue;
+
 								if(errno != EWOULDBLOCK)
 								{
 									std::cout << "Read message ... error: " << ret << " errno: " << errno <<&std::endl;
@@ -240,24 +193,27 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 
 							if (ret == net::status::disconnected)
 							{
-								std::cout << "Read message ... disconnected: " << ret << "errno: " << errno <<&std::endl;
+								std::cout << "Read message ... disconnected: " << ret << " errno: " << errno <<&std::endl;
 								net::free(currentPollFd.fd);
 								serverIsRun = false;
 								break;
 							}
 						}
 
-						std::cout << "Write message ... " << std::endl;
+						std::cout << "Write message ... " << &std::endl;
 						ret = net::write(currentPollFd.fd, serverRequest.data(), ret);
 						if (ret > 0)
 						{
 							haveMessage = false;
-							std::cout << "Write message ... complete, ret status: " << ret << std::endl;
+							std::cout << "Write message ... complete, ret status: " << ret << &std::endl;
 							continue;
 						}
 
 						if (ret < 0)
 						{
+							if (errno == NET_SOCKET_EAGAIN  || errno == NET_SOCKET_WOULD_BLOCK)
+								continue;
+
 							std::cout << "Write message ...  error: " << ret << " errno: " << errno <<&std::endl;
 							net::free(currentPollFd.fd);
 							serverIsRun = false;
@@ -265,7 +221,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 						}
 						if (ret == net::status::disconnected)
 						{
-							std::cout << "Write message ... disconnected: " << ret << "errno: " << errno <<&std::endl;
+							std::cout << "Write message ... disconnected: " << ret << " errno: " << errno <<&std::endl;
 							net::free(currentPollFd.fd);
 							serverIsRun = false;
 							break;

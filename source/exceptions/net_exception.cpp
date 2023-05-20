@@ -42,6 +42,30 @@ namespace net
     }
 
 
+    void throw_exception_on_revents(const int32_t revent, const net::pollc::param exclude, const char* label_excep)
+    {
+        if (revent > 0)
+        {
+            std::cout << label_excep << " actual param: " << revent << & std::endl;
+            return;
+        }
+
+		if (revent == 0)
+		{
+            std::string reventError{label_excep};
+            reventError.append(" unexpected revent error");
+			throw net::exception(reventError.c_str());
+		}
+
+		if (revent != exclude)
+		{
+            std::string reventError{label_excep};
+            reventError.append(" unexpected revent error");
+			throw net::exception(reventError.c_str());
+		}
+    }
+
+
     exception::exception(const char* error)
         : m_errorCode{ NET_ERROR_CODE }
     {
