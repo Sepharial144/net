@@ -46,7 +46,7 @@ private:
     const int32_t messageLimit = 5;
     net::settings::server_t m_server;
     net::settings::connection_t m_connection;
-    const char* m_address = "127.0.0.1";
+    const char* m_address = "localhost";
 	const char* m_connectionPort = "3000";
 	const int32_t m_port = 3000;
 };

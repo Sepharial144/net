@@ -113,13 +113,11 @@ namespace net {
 		std::cout << "Connection initialization ..." << &std::endl;
 
         socket_t sockConnection = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
-        // ::socket(setting.aiFamily, setting.aiSocktype, 0);
 
         struct sockaddr_in addr = { 0 };
         addr.sin_family = setting.aiFamily;
 		addr.sin_port = ::htons(net::api::translatePort<int32_t>(port));
-		// TODO: change to INADDR_ANY
-        addr.sin_addr.s_addr = ::htonl(INADDR_LOOPBACK);
+        addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
         int32_t ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
         net::throw_exception_on(ret < 0, "Netlib: connection failed");
 

@@ -114,7 +114,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
     	};
 
 		std::thread serverThread = std::thread([&]{
-            net::socket_t tcp_server = net::make_async_server(settings, "127.0.0.1", 3000);
+            net::socket_t tcp_server = net::make_async_server(settings, "localhost", 3000);
 
 			serverSocketArray[0].fd = tcp_server;
         	serverSocketArray[0].events = net::pollc::in;
