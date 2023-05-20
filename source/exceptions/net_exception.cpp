@@ -11,7 +11,6 @@
 #define NET_OS_MESSAGE " code: "
 #endif
 
-// TODO: change definition of exception to crossplatform
 namespace net
 {
     void throw_exception_on(const bool is_error, const char* error)
