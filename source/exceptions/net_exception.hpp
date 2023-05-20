@@ -10,6 +10,7 @@ namespace net
     * Exception wrapper
     */
     void throw_exception_on(const bool is_error, const char* error);
+    void throw_exception_on_poll(const int32_t ret_status, const char* call_placement);
 
     /*
     * Exception

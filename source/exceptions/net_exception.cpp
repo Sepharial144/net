@@ -20,6 +20,28 @@ namespace net
            throw net::exception(error);
     }
 
+
+    void throw_exception_on_poll(const int32_t ret_status, const char* call_placement)
+    {
+        if (ret_status > 0)
+            return;
+
+        if (ret_status == 0)
+        {
+            std::string pollError{call_placement};
+            pollError.append(" unexpected poll error");
+            throw net::exception(pollError.c_str());
+        }
+
+        if (ret_status == net::pollc::poll_error)
+        {
+            std::string pollError{call_placement};
+            pollError.append(" call poll failed");
+            throw net::exception(pollError.c_str());
+        }
+    }
+
+
     exception::exception(const char* error)
         : m_errorCode{ NET_ERROR_CODE }
     {

@@ -22,12 +22,12 @@ int main()
 
     try
     {
-        net::socket_t tcp_server = net::make_async_server(settings, address, port);
+        socket_t tcp_server = net::make_async_server(settings, address, port);
         std::array<char, 1024ul> request = { 0 };
 
         std::string message{"Asynchronous socket!"};
-        struct pollfd serverSocketArray[1];
-        struct pollfd fdArray[10];
+        pollfd_s serverSocketArray[1];
+        pollfd_s fdArray[10];
 
         int32_t countClientFd = 0;
         int32_t currentSocketFd = 0;
@@ -114,7 +114,7 @@ int main()
 
             for(size_t i = 0ul; i < nfds; ++i)
             {
-                struct pollfd currentPollFd = fdArray[i];
+                net::pollfd_s currentPollFd = fdArray[i];
                 std::cout << "Check client events ... socket idx: " << i << &std::endl;
 
                 std::cout << "Returned event: " << currentPollFd.revents << std::endl;

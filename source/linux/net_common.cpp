@@ -90,7 +90,30 @@ namespace net {
         return sockServer;
 	}
 
-    	//TODO: fix int port to char
+	int32_t wait_async_connection(net::socket_t& sock_server, net::socket_t& sock_client, int32_t connections)
+	{
+		std::cout << "Server wait connection ... " << &std::endl;
+		//TODO: implement throw error when client in valid
+        net::throw_exception_on(sock_client > 0, "Netlib: provided client is not closed");
+
+		sock_client = ::accept(sock_server, nullptr, nullptr);
+		//sock_client = ::accept(sock_server, reinterpret_cast<sockaddr*>(&client.m_sockaddrStorage), nullptr);
+        net::throw_exception_on(sock_client < 0, "Netlib: error while connect client");
+		if (sock_client < 0)
+		{
+			std::cout << "Server client socket got accept error" << &std::endl;
+			return 0;
+		}
+
+		// How to find address of client by socket?
+		//client.m_familyType = m_serverSetting.aiFamily;
+		//net::api::interpretFamilyAddress(client.m_sockaddrStorage, client.m_address, m_serverSetting.aiFamily);
+
+		std::cout << "Server got connection socket id ... " << sock_client << &std::endl;
+		return 1;
+	}
+
+    //TODO: fix int port to char
 	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port)
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
@@ -101,6 +124,7 @@ namespace net {
         struct sockaddr_in addr = { 0 };
         addr.sin_family = setting.aiFamily;
 		addr.sin_port = ::htons(net::api::translatePort<int32_t>(port));
+		// TODO: change to INADDR_ANY
         addr.sin_addr.s_addr = ::htonl(INADDR_LOOPBACK);
         int32_t ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
         net::throw_exception_on(ret < 0, "Netlib: connection failed");
