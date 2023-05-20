@@ -229,7 +229,6 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 					} while(true); 
 				} // end of loop through pollable descriptors 
 			} // end of serving running.
-
         });
 
 		std::thread connectionThread = std::thread([&]{
@@ -237,7 +236,6 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 
 			while (true)
 			{
-				//std::this_thread::sleep_for(std::chrono::milliseconds(50));
 				int32_t ret = net::write(tcp_connection, message.data(), message.size());
 				if (!ret)
 					throw net::exception("Client write status error");
@@ -245,7 +243,8 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 				if (ret = net::read(tcp_connection, clientRequest.data(), clientRequest.size()) > 0)
 				{
 					clientCountMessage++;
-					//std::memset(clientRequest.data(), 0, clientRequest.size());
+					if (clientCountMessage != messageLimit)
+						std::memset(clientRequest.data(), 0, clientRequest.size());
 					if (clientCountMessage == messageLimit)
 						break;
 				} else 
