@@ -3,25 +3,21 @@
 
 #include "net.hpp"
 
-namespace net
+namespace net::api
 {
-    namespace api {
+    const char* translateAddress(const char* address);
 
-        const char* translateAddress(const char* address);
-
-        template<typename Numeric>
-        Numeric translatePort(const char* port)
+    template<typename Numeric>
+    Numeric translatePort(const char* port)
+    {
+        Numeric result = *port - 48;
+        while(char letter = *(++port))
         {
-            Numeric result = *port - 48;
-            while(char letter = *(++port))
-            {
-                result *= 10;
-                result += letter - 48;
-            }
-            return result;
+            result *= 10;
+            result += letter - 48;
         }
-  
-    } // namespace api
-} // namespace net
+        return result;
+    }
+} // namespace net::api
 
 #endif // !_NET_API_HPP_

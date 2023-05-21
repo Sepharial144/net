@@ -24,6 +24,11 @@ public:
         return net::make_connection(m_connection, m_address, m_connectionPort);
     }
 
+    net::socket_t createAsyncTcpServer()
+    {
+        return net::make_async_connection(m_connection, m_address, m_connectionPort);
+    }
+
 protected:
     void SetUp() override
     {

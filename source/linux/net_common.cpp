@@ -62,7 +62,7 @@ namespace net {
         socket_t sockServer = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
         net::throw_exception_on(sockServer < 0, "Netlib: asynchronous server create socket failed");
 
-		int32_t on = 1;
+		constexpr int32_t on = 1;
 		int32_t ret = ::setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
 		net::throw_exception_on(ret < 0, "Netlib: asynchronous server set socket option failed");
 		
@@ -96,7 +96,7 @@ namespace net {
 		{
 			// TODO: take and addresss of client
 			sock_client = ::accept(sock_server, nullptr, nullptr);
-		} while(errno == EAGAIN || errno == EWOULDBLOCK);
+		} while(sock_client < 0 && (errno == EAGAIN || errno == EWOULDBLOCK));
 		if (sock_client < 0)
 		{
 			std::cout << "Asynchronous server client socket got accept error" << &std::endl;
@@ -114,11 +114,15 @@ namespace net {
 
         socket_t sockConnection = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
 
+		constexpr int32_t on = 1;
+		int32_t ret = ::setsockopt(sockConnection, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
+		net::throw_exception_on(ret < 0, "Netlib: connection set socket option failed");
+
         struct sockaddr_in addr = { 0 };
         addr.sin_family = setting.aiFamily;
 		addr.sin_port = ::htons(net::api::translatePort<int32_t>(port));
         addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-        int32_t ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
+        ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
         net::throw_exception_on(ret < 0, "Netlib: connection failed");
 
         std::cout << "Connection initialization ... complete" << &std::endl;

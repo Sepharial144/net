@@ -23,6 +23,8 @@
 	#define NET_SOCKET_ERROR SOCKET_ERROR
 #elif defined(linux) && !defined(_WIN32)
 	#define NET_SOCKET_ERROR -1
+	#define NET_SOCKET_EAGAIN_EXPR errno == EAGAIN
+	#define NET_SOCKET_WBLOCK_EXPR errno == EWOULDBLOCK
 #endif
 
 namespace net {
@@ -31,7 +33,7 @@ namespace net {
 	enum status: int16_t
 	{
 		error = -1,
-		disconnected = 0
+		disconnected = 0,
 	};
 
 	namespace socket {
@@ -40,6 +42,8 @@ namespace net {
 			blocking = 0,
 			nonblocking = 1
 		};
+
+
 	} // namespace socket
 
 
@@ -191,14 +195,12 @@ namespace net {
 #elif defined(linux) && !defined(_WIN32)
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
 	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port);
+	int32_t  wait_async_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
 #endif
 	int32_t  wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
-	int32_t  wait_async_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
 
 	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
 	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port);
-	//int64_t  on_read(pollfd_s& poll_array, uint64_t socket_idx, int64_t timeout);
-	//int64_t on_write(pollfd_s& poll_array, uint64_t socket_idx, int64_t timeout);
 
 #if defined(linux) && !defined(_WIN32)	
 	void set_pollfd(net::pollfd_s pollfd_array[], uint64_t array_len, net::pollc::param param);
