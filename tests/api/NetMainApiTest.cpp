@@ -88,7 +88,7 @@ TEST_F(TCPTest, TCPCommunication)
 
 TEST_F(TCPTest, TCPCommunicationAsynchronous)
 {
-	EXPECT_NO_THROW(([this]{
+	EXPECT_NO_THROW(([this](){
 		const std::string message{"Asynchronous socket!"};
 		std::array<char, 1024ul> serverRequest = { 0 };
 		std::array<char, 1024ul> clientRequest = { 0 };
@@ -265,7 +265,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 		EXPECT_EQ(clientCountMessage, messageLimit);
 		EXPECT_EQ(std::strcmp(serverRequest.data(), clientRequest.data()), 0);
 	}
-	()));
+	));
 }
 
 TEST(TestSecond, TestSecond) {

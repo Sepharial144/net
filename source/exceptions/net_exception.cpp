@@ -25,17 +25,18 @@ namespace net
         if (ret_status > 0)
             return;
 
+        // TODO: findout behavior of this value, might not error
         if (ret_status == 0)
         {
             std::string pollError{call_placement};
-            pollError.append(" unexpected poll error");
+            pollError.append(" unexpected poll error,");
             throw net::exception(pollError.c_str());
         }
 
         if (ret_status == net::pollc::poll_error)
         {
             std::string pollError{call_placement};
-            pollError.append(" call poll failed");
+            pollError.append(" call poll failed,");
             throw net::exception(pollError.c_str());
         }
     }
@@ -45,21 +46,20 @@ namespace net
     {
         if (revent > 0)
         {
-            std::cout << label_excep << " actual param: " << revent << & std::endl;
             return;
         }
 
 		if (revent == 0)
 		{
             std::string reventError{label_excep};
-            reventError.append(" unexpected revent error");
+            reventError.append(" unexpected revents error");
 			throw net::exception(reventError.c_str());
 		}
 
 		if (revent != exclude)
 		{
             std::string reventError{label_excep};
-            reventError.append(" unexpected revent error");
+            reventError.append(" revents error");
 			throw net::exception(reventError.c_str());
 		}
     }
