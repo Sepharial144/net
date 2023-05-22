@@ -16,8 +16,8 @@
 #endif
 
 // settings of sockets
-#define NET_TCPIP_PACKET_MAX_SIZE 65536;
-#define NET_IPV4_MAX_PORT 65535;
+#define NET_TCPIP_PACKET_MAX_SIZE 65536
+#define NET_IPV4_MAX_PORT 65535
 
 #if defined(_WIN32) && !defined(linux)
 	#define NET_SOCKET_ERROR SOCKET_ERROR
@@ -80,7 +80,7 @@ namespace net {
 			poll_timeout = 1,
 			poll_error = -1
 		} ;
-	} //namespace poll
+	} //namespace pollc
 #endif
 
 	enum enumShutdown : int16_t
@@ -169,10 +169,10 @@ namespace net {
 		};
 	} // !namespace settings
 
-	struct ipAddress
+	struct ip_address_s
 	{
 		u_short port;
-		uint8_t address[INET6_ADDRSTRLEN]; // windows length of address ipv6
+		uint8_t address[INET6_ADDRSTRLEN];
 		size_t addr_size;
 		net::settings::aifamily type;
 	};
@@ -193,7 +193,9 @@ namespace net {
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
 	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port);
 #elif defined(linux) && !defined(_WIN32)
-	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
+	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param);
+
+	[[deprecated]]
 	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port);
 	int32_t  wait_async_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
 #endif
@@ -205,6 +207,8 @@ namespace net {
 #if defined(linux) && !defined(_WIN32)	
 	void set_pollfd(net::pollfd_s pollfd_array[], uint64_t array_len, net::pollc::param param);
 	int32_t poll(net::pollfd_s* pollfd_array, uint64_t array_len, int64_t timeout);
+	void interpret_address(socket_t& sockfd, ip_address_s& ip_addr);
+	bool is_connected(socket_t& sockfd);
 #endif
 
 	int32_t  read(net::socket_t& socket, char* data, size_t len);
@@ -270,7 +274,7 @@ namespace net {
 #endif
 		socket_t m_socket;
 		net::settings::aifamily m_familyType;
-		ipAddress m_address;
+		ip_address_s m_address;
 	};
 
 

@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 #include <poll.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -24,6 +25,7 @@
 #define NET_SOCKET_ERROR -1
 // IIQ: is connection reset on linux as -1?
 #define NET_CONNECTION_RESET -1
+
 /*
 * Socket shutdown parameter
 */
@@ -33,7 +35,7 @@
 
 #define NET_SOCKET_WOULD_BLOCK EWOULDBLOCK
 #define NET_SOCKET_EAGAIN	   EAGAIN
-
+ 
 #endif
 
 #endif // !_LINUX_SOCKET_DEFINITIONS_HPP_

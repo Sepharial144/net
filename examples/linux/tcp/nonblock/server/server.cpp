@@ -22,7 +22,7 @@ int main()
 
     try
     {
-        socket_t tcp_server = net::make_async_server(settings, address, port);
+        socket_t tcp_server = net::make_server(settings, address, port, net::socket::type::nonblocking);
         std::array<char, 1024ul> request = { 0 };
 
         std::string message{"Asynchronous socket!"};

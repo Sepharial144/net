@@ -16,7 +16,7 @@ public:
 
     net::socket_t createTCPServer()
     {
-        return net::make_server(m_server, m_address, m_port);
+        return net::make_server(m_server, m_address, m_port, net::socket::type::blocking);
     }
 
     net::socket_t createTCPConnection()

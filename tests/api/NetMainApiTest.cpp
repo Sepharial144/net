@@ -113,6 +113,26 @@ TEST_F(TCPTest, TCPServerDisconnect)
 }
 */
 
+TEST(CommonTest, GetAddress)
+{
+	net::settings::server_t settings = net::settings::server_t{
+		net::settings::aifamily::inetv4,
+		net::settings::aisocktype::stream,
+		net::settings::aiprotocol::tcp,
+		net::settings::aiflags::passive,
+		10ul
+	};
+	net::socket_t tcp_server = net::make_server(settings, "localhost", 3000, net::socket::type::blocking);
+	net::ip_address_s ipAddress = {0};
+	net::interpret_address(tcp_server, ipAddress);
+	net::free(tcp_server);
+	std::string ipAddr;
+	ipAddr.resize(INET6_ADDRSTRLEN);
+	std::memcpy(ipAddr.data(), &ipAddress, ipAddress.addr_size);
+	EXPECT_EQ(ipAddr, "127.0.0.1");
+	EXPECT_EQ(true, ipAddress.port > 0 && ipAddress.port < NET_IPV4_MAX_PORT);
+}
+
 TEST_F(TCPTest, TCPCommunication)
 {
 	EXPECT_NO_THROW(([this]{
@@ -152,6 +172,8 @@ TEST_F(TCPTest, TCPCommunication)
 				net::free(tcp_client);
 			}
         });
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		std::thread connectionThread = std::thread([&]{
 			net::socket_t tcp_connection = createTCPConnection();
@@ -210,7 +232,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
     	};
 
 		std::thread serverThread = std::thread([&]{
-            net::socket_t tcp_server = net::make_async_server(settings, "localhost", 3000);
+            net::socket_t tcp_server = net::make_server(settings, "localhost", 3000, net::socket::type::nonblocking);
 
 			serverSocketArray[0].fd = tcp_server;
         	serverSocketArray[0].events = net::pollc::in;
@@ -327,6 +349,8 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 			} // end of serving running.
         });
 
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 		std::thread connectionThread = std::thread([&]{
 			net::socket_t tcp_connection = createTCPConnection();
 
@@ -394,7 +418,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
     	};
 
 		std::thread serverThread = std::thread([&]{
-            net::socket_t tcp_server = net::make_async_server(settings, "localhost", 3000);
+            net::socket_t tcp_server = net::make_server(settings, "localhost", 3000, net::socket::type::nonblocking);
 
 			serverSocketArray[0].fd = tcp_server;
         	serverSocketArray[0].events = net::pollc::in;
@@ -505,6 +529,8 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 				net::free(tcp_client);
 				serverIsRun = false;
         });
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		std::thread connectionThread = std::thread([&]{
 

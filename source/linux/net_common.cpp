@@ -2,9 +2,11 @@
 #include "exceptions/net_exception.hpp"
 #include "net_api.hpp"
 
+#include <cstring>
+
 namespace net { 
 
-    socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port)
+    socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -14,13 +16,23 @@ namespace net {
         socket_t sockServer = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
         net::throw_exception_on(sockServer < 0, "Netlib: server create socket failed");
 
+		constexpr int32_t on = 1;
+		int32_t ret = ::setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
+		net::throw_exception_on(ret < 0, "Netlib: asynchronous server set socket option failed");
+
+		if (sock_param == net::socket::type::nonblocking)
+		{
+			ret = ::ioctl(sockServer, FIONBIO, &sock_param);
+			net::throw_exception_on(ret < 0, "Netlib: asynchronous server ioctl call failed");
+		}
+
 		struct sockaddr_in addr = { 0 };
         addr.sin_family = setting.aiFamily;
         addr.sin_port = ::htons(port);
         // TODO: create for certain address macro
         addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
 
-        int32_t ret = ::bind(sockServer, (struct sockaddr*)&addr, sizeof(addr));
+        ret = ::bind(sockServer, (struct sockaddr*)&addr, sizeof(addr));
         net::throw_exception_on(ret < 0, "Netlib: server bind failed");
 
         ret = ::listen(sockServer, 1);
@@ -52,6 +64,7 @@ namespace net {
 		return 1;
 	}
 
+	[[deprecated]]
 	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port)
 	{
 		std::cout << "Asynchronous server initializing ..." << &std::endl;
@@ -169,6 +182,31 @@ namespace net {
 	int32_t poll(net::pollfd_s* pollfd_array, uint64_t array_len, int64_t timeout)
 	{
 		return ::poll(pollfd_array, array_len, timeout);
+	}
+
+	void interpret_address(socket_t& sockfd, ip_address_s& ip_addr)
+	{
+		struct sockaddr_in sockAddress = {0};
+		size_t szAddress = sizeof(sockAddress);
+		int32_t ret =  ::getpeername(sockfd, (struct sockaddr*)(&sockAddress), (socklen_t*)(&szAddress));
+		net::throw_exception_on(ret == -1, "Netlib: interpret address failed");
+
+		const char* pAddress = ::inet_ntoa(sockAddress.sin_addr);
+		ip_addr.addr_size = std::strlen(pAddress);
+		ip_addr.port = ::htons(sockAddress.sin_port);
+		std::memcpy(ip_addr.address, pAddress, ip_addr.addr_size);
+
+		std::cout << "Address: " << pAddress << " " << ip_addr.port << std::endl;
+	}
+
+	bool is_connected(socket_t& sockfd)
+	{
+		struct sockaddr_in sockAddress = {0};
+		size_t szAddress = sizeof(sockAddress);
+		int32_t ret = ::getpeername(sockfd, (struct sockaddr*)(&sockAddress), (socklen_t*)(&szAddress));
+		if (ret != -1)
+			return true;
+		return false;
 	}
 
     server::server(const net::settings::server_t& settings, const int32_t port)
