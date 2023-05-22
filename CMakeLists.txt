@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.20)
 
-project(net VERSION 0.64 LANGUAGES CXX)
+project(net VERSION 0.74 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
