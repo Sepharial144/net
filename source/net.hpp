@@ -183,7 +183,7 @@ namespace net {
 	struct ip_address_s
 	{
 		u_short port;
-		uint8_t address[INET6_ADDRSTRLEN];
+		const char* address;
 		size_t addr_size;
 		net::settings::aifamily type;
 	};

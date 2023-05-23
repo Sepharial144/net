@@ -226,12 +226,10 @@ namespace net {
 		int32_t ret =  ::getpeername(sockfd, (struct sockaddr*)(&sockAddress), (socklen_t*)(&szAddress));
 		net::throw_exception_on(ret == -1, "Netlib: interpret address failed");
 
-		const char* pAddress = ::inet_ntoa(sockAddress.sin_addr);
-		ip_addr.addr_size = std::strlen(pAddress);
+		ip_addr.address = ::inet_ntoa(sockAddress.sin_addr);
+		ip_addr.addr_size = std::strlen(ip_addr.address);
+		ip_addr.type = (ip_addr.addr_size == INET6_ADDRSTRLEN)? net::settings::aifamily::inetv6 : net::settings::aifamily::inetv4;
 		ip_addr.port = ::htons(sockAddress.sin_port);
-		std::memcpy(ip_addr.address, pAddress, ip_addr.addr_size);
-
-		std::cout << "Address: " << pAddress << " " << ip_addr.port << std::endl;
 	}
 
 	bool is_connected(socket_t& sockfd)
