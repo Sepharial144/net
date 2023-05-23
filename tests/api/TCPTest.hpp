@@ -21,7 +21,7 @@ public:
 
     net::socket_t createTCPConnection()
     {
-        return net::make_connection(m_connection, m_address, m_connectionPort);
+        return net::make_connection(m_connection, m_address, m_connectionPort, net::socket::type::blocking);
     }
 
     net::socket_t createAsyncTcpServer()

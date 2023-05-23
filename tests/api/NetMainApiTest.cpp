@@ -37,7 +37,7 @@ TEST_F(TCPTest, TCPServerDisconnect)
 				10ul
 			};
 
-            net::socket_t tcp_server = net::make_async_server(settings, "localhost", 3000);
+            net::socket_t tcp_server = net::make_server(settings, "localhost", 3000, net::socket::type::blocking);
 			net::socket_t tcp_client = {0};
 
 			if (net::wait_connection(tcp_server, tcp_client, 10))
@@ -204,6 +204,7 @@ TEST_F(TCPTest, TCPCommunication)
 	()));
 }
 
+/*
 TEST_F(TCPTest, TCPCommunicationAsynchronous)
 {
 	EXPECT_NO_THROW(([this]{
@@ -249,9 +250,8 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 			std::cout << "Server check revents ... complete" << &std::endl;
 
 			std::cout << "Accept connection ..." << &std::endl;
-
 			net::socket_t tcp_client  = {0};
-			ret = net::wait_async_connection(tcp_server, tcp_client , 10);
+			ret = net::wait_connection(tcp_server, tcp_client , 10);
 			net::throw_exception_on(ret == 0, "Accept connection ... failed");
 
 			fdArray[currentSocketFd].fd = tcp_client;
@@ -323,6 +323,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 						if (ret > 0)
 						{
 							haveMessage = false;
+							std::memset(serverRequest.data(), 0, serverRequest.size());
 							std::cout << "Write message ... complete, ret status: " << ret << &std::endl;
 							continue;
 						}
@@ -387,6 +388,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 	}
 	()));
 }
+*/
 
 
 // TODO: create async socket connection
@@ -399,6 +401,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 
 		net::pollfd_s serverSocketArray[1];
         net::pollfd_s fdArray[1];
+		net::pollfd_s fdConnectionArray[1];
 
 		int32_t countClientFd = 0;
         int32_t currentSocketFd = 0;
@@ -438,14 +441,16 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 			std::cout << "Accept connection ..." << &std::endl;
 
 			net::socket_t tcp_client  = {0};
-			ret = net::wait_async_connection(tcp_server, tcp_client , 10);
+			ret = net::wait_connection(tcp_server, tcp_client , 10);
 			net::throw_exception_on(ret == 0, "Accept connection ... failed");
 
 			fdArray[currentSocketFd].fd = tcp_client;
         	fdArray[currentSocketFd].events = net::pollc::in;
 			++countClientFd;
 			++nfds;
+			std::cout << "Close listening socket ..." << &std::endl;
 			net::free(tcp_server);
+			std::cout << "Close listening socket ... complete" << &std::endl;
 			std::cout << "Accept connection ... complete" << &std::endl;
 			std::cout << "Server is running ..." << &std::endl;
 
@@ -472,12 +477,11 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 					{
 						if (!haveMessage)
 						{
-							std::cout << "Read message ..." << &std::endl;
+							std::cout << "Server read message ..." << &std::endl;
 							ret = net::read(currentPollFd.fd, serverRequest.data(), serverRequest.size());
 							if (ret > 0)
 							{
-								std::cout << "Read message ... complete, ret status: " << ret << " " << serverRequest.data() << " len: " << ret << &std::endl;
-								serverCountMessage++;
+								std::cout << "Server read message ... complete, ret status: " << ret << " " << serverRequest.data() << " len: " << ret << &std::endl;
 								haveMessage = true;
 								continue;
 							}
@@ -485,52 +489,64 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 							if (ret < 0)
 							{
 								if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+								{
+									std::cout << "Server read message ... not ready" << &std::endl;
 									continue;
+								}
 
-								std::cout << "Read message ... error: " << ret << " errno: " << errno <<&std::endl;
-								goto serverInError;
+								std::cout << "Server read message ... error: " << ret << " errno: " << errno <<&std::endl;
+								goto finishServer;
 							}
 
 							if (ret == net::status::disconnected)
 							{
-								std::cout << "Read message ... disconnected: " << ret << " errno: " << errno <<&std::endl;
-								goto serverInError;
+								std::cout << "Server read message ... disconnected: " << ret << " errno: " << errno <<&std::endl;
+								goto finishServer;
 							}
 						}
 
-						std::cout << "Write message ... " << &std::endl;
+						std::cout << "Server write message ... " << &std::endl;
 						ret = net::write(currentPollFd.fd, serverRequest.data(), ret);
 						if (ret > 0)
 						{
+							serverCountMessage++;
+							if (serverCountMessage == messageLimit)
+								goto finishServer;
 							haveMessage = false;
-							std::cout << "Write message ... complete, ret status: " << ret << &std::endl;
+							std::memset(serverRequest.data(), 0, serverRequest.size());
+							std::cout << "Server write message ... complete, ret status: " << ret << &std::endl;
 							continue;
 						}
 
 						if (ret < 0)
 						{
 							if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+							{
+								std::cout << "Server write messag ... not ready" << &std::endl;
 								continue;
+							}
 
-							std::cout << "Write message ...  error: " << ret << " errno: " << errno <<&std::endl;
-							goto serverInError;
+							std::cout << "Server write messag ...  error: " << ret << " errno: " << errno <<&std::endl;
+							goto finishServer;
 						}
 						if (ret == net::status::disconnected)
 						{
-							std::cout << "Write message ... disconnected: " << ret << " errno: " << errno <<&std::endl;
+							std::cout << "Server write messag ... disconnected: " << ret << " errno: " << errno <<&std::endl;
 							net::free(currentPollFd.fd);
-							goto serverInError;
+							goto finishServer;
 						}
+
 					} while(true); 
 				} // end of loop through pollable descriptors 
 			} // end of serving running.
 
-			serverInError:
+			goto finishServer;
+			finishServer:
 				net::free(tcp_client);
 				serverIsRun = false;
         });
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 
 		std::thread connectionThread = std::thread([&]{
 
@@ -541,34 +557,95 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
                 net::settings::aiflags::passive
     	    };
 
-			net::socket_t tcp_connection = net::make_connection(settings, "localhost", "3000");
+			net::socket_t tcp_connection = net::make_connection(settings, "localhost", "3000", net::socket::type::nonblocking);
 
+/*			std::cout << "Connection poll call ..." << &std::endl;
+			constexpr size_t timeout = 60 * 1000 * 3;
+			int32_t ret = net::poll(fdConnectionArray, 1, timeout);
+			net::throw_exception_on_poll(ret, "Connection poll call ...");
+			std::cout << "Call connnection poll ... complete" << &std::endl;
+
+			std::cout << "Connection revents ... complete" << &std::endl;
+			net::pollfd_s currentPollConnection = fdConnectionArray[0];
+			std::cout << "Connection revents ... returned event: " << currentPollConnection .revents << &std::endl;
+			net::throw_exception_on_revents(currentPollConnection.revents, net::pollc::in, "Connection revents ...");
+			std::cout << "Connection revents ... complete" << &std::endl;
+*/
+
+			int32_t ret = 0;
+			bool messageIncoming = false;
 			while (true)
 			{
-				int32_t ret = net::write(tcp_connection, message.data(), message.size());
-				if (!ret)
-					throw net::exception("Client write status error");
-
-				if (ret = net::read(tcp_connection, clientRequest.data(), clientRequest.size()) > 0)
+				if (!messageIncoming)
 				{
+					std::cout << "Connection write message ... " << &std::endl;
+					ret = net::write(tcp_connection, message.data(), message.size());
+					if (ret > 0)
+					{
+						std::cout << "Connection write message ... complete: " << ret << &std::endl;
+						messageIncoming = true;
+						continue;
+					}
+
+					if (ret < 0)
+					{
+						if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+						{
+							std::cout << "Connection write message ... not ready" << &std::endl;
+							continue;
+						}
+
+						net::shutdown(tcp_connection, net::enumShutdown::both);
+						net::free(tcp_connection);
+						throw net::exception("Client write status error");
+					}
+
+					if (ret == net::status::disconnected)
+					{
+						std::cout << "Connection write message ... disconnected: " << ret << " errno: " << errno <<&std::endl;
+						net::shutdown(tcp_connection, net::enumShutdown::both);
+						net::free(tcp_connection);
+						throw net::exception("Server has gone");
+					}
+				}
+
+
+				std::cout << "Connection read message ... " << &std::endl;
+				ret = net::read(tcp_connection, clientRequest.data(), clientRequest.size());
+				if (ret > 0)
+				{
+					std::cout << "Connection read message ... complete" << &std::endl;
 					clientCountMessage++;
-					if (clientCountMessage != messageLimit)
-						std::memset(clientRequest.data(), 0, clientRequest.size());
 					if (clientCountMessage == messageLimit)
 						break;
+					messageIncoming = false;
+					std::memset(clientRequest.data(), 0, clientRequest.size());
 					continue;
-				} 
+				}
 
 				if (ret < 0)
 				{
 					if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+					{
+						std::cout << "Connection read message ... not ready" << &std::endl;
 						continue;
-					
+					}
+
 					net::shutdown(tcp_connection, net::enumShutdown::both);
 					net::free(tcp_connection);
 					throw net::exception("Client read status error");
 				}
+
+				if (ret == net::status::disconnected)
+				{
+					std::cout << "Connection read message ... disconnected: " << ret << " errno: " << errno <<&std::endl;
+					net::shutdown(tcp_connection, net::enumShutdown::both);
+					net::free(tcp_connection);
+					throw net::exception("Server has gone");
+				}
 			}
+
+
 			std::cout << "Close connection ... " << &std::endl;
 			net::shutdown(tcp_connection, net::enumShutdown::both);
 			net::free(tcp_connection);

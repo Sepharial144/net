@@ -21,7 +21,7 @@ int main()
 
     try
     {
-        net::socket_t tcp_connection = net::make_connection(settings, address, port);
+        net::socket_t tcp_connection = net::make_connection(settings, address, port, net::socket::type::blocking);
         std::array<char, 1024ul> request = { 0 };
         std::string message{"init string"};
         int32_t count = 0;

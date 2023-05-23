@@ -29,7 +29,7 @@ namespace net
         if (ret_status == 0)
         {
             std::string pollError{call_placement};
-            pollError.append(" unexpected poll error,");
+            pollError.append(" poll timeout error,");
             throw net::exception(pollError.c_str());
         }
 

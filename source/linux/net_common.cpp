@@ -3,10 +3,12 @@
 #include "net_api.hpp"
 
 #include <cstring>
+#include <thread>
+#include <chrono>
 
 namespace net { 
 
-    socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param)
+    socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param = net::socket::type::blocking)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -43,20 +45,18 @@ namespace net {
         return sockServer;
 	}
 
-	//TODO: implement hash of client
 	int32_t wait_connection(net::socket_t& sock_server, net::socket_t& sock_client, int32_t connections)
 	{
 		std::cout << "Server wait connection ... " << &std::endl;
-		//TODO: implement throw error when client in valid
         net::throw_exception_on(sock_client > 0, "Netlib: provided client is not closed");
 
-		// TODO: take and addresss of client
-		sock_client = ::accept(sock_server, nullptr, nullptr);
-        net::throw_exception_on(sock_client < 0, "Netlib: error while connect client");
-
+		do
+		{
+			sock_client = ::accept(sock_server, nullptr, nullptr);
+		} while(sock_client < 0 && (errno == EAGAIN || errno == EWOULDBLOCK));
 		if (sock_client < 0)
 		{
-			std::cout << "Server client socket got accept error" << &std::endl;
+			std::cout << "Asynchronous server client socket got accept error" << &std::endl;
 			return 0;
 		}
 
@@ -107,7 +107,6 @@ namespace net {
 		
 		do
 		{
-			// TODO: take and addresss of client
 			sock_client = ::accept(sock_server, nullptr, nullptr);
 		} while(sock_client < 0 && (errno == EAGAIN || errno == EWOULDBLOCK));
 		if (sock_client < 0)
@@ -121,7 +120,10 @@ namespace net {
 	}
 
     //TODO: fix int port to char
-	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port)
+	socket_t make_connection(net::settings::connection_t& setting, 
+							 const char* address, 
+							 const char* port, 
+							 net::socket::type sock_param = net::socket::type::blocking)
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
 
@@ -135,8 +137,41 @@ namespace net {
         addr.sin_family = setting.aiFamily;
 		addr.sin_port = ::htons(net::api::translatePort<int32_t>(port));
         addr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-        ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
-        net::throw_exception_on(ret < 0, "Netlib: connection failed");
+
+		if (sock_param == net::socket::type::nonblocking)
+		{
+			ret = ::ioctl(sockConnection, FIONBIO, &sock_param);
+			net::throw_exception_on(ret < 0, "Netlib: connection ioctl call failed");
+		
+			do{
+				std::this_thread::sleep_for(std::chrono::microseconds(37));
+				ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
+				std::cout << "Connection async status: " << ret << " errno: " << errno << &std::endl;
+			} while(ret != 0);	
+			std::cout << "Connection async status ready: " << ret << " errno: " << errno << &std::endl; 
+		} else 
+		{
+			ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
+			net::throw_exception_on(ret < 0, "Netlib: connection failed");
+		}
+
+/*
+		if (sock_param == net::socket::type::blocking)
+		{
+			ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
+        	net::throw_exception_on(ret < 0, "Netlib: connection failed");
+			if (ret < 0 && errno != EINPROGRESS)
+				throw net::exception("Netlib: connection failed");
+		} else {
+			do
+			{
+			ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
+			net::throw_exception_on(ret < 0, "Netlib: connection failed");
+			if (ret < 0 && errno == EALREADY)
+				throw net::exception("Netlib: connection failed");
+			} while (ret < 0 && errno == EINPROGRESS);
+		}
+*/
 
         std::cout << "Connection initialization ... complete" << &std::endl;
         return sockConnection;

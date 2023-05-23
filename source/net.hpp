@@ -77,7 +77,7 @@ namespace net {
 
 		enum poll_ret: int16_t
 		{
-			poll_timeout = 1,
+			poll_timeout = 0,
 			poll_error = -1
 		} ;
 	} //namespace pollc
@@ -169,14 +169,6 @@ namespace net {
 		};
 	} // !namespace settings
 
-	struct ip_address_s
-	{
-		u_short port;
-		uint8_t address[INET6_ADDRSTRLEN];
-		size_t addr_size;
-		net::settings::aifamily type;
-	};
-
 #if defined(_WIN32) && !defined(linux)
 	typedef SOCKET socket_t;
 	typedef WSAPOLLFD pollfd_s;
@@ -188,20 +180,37 @@ namespace net {
 	typedef fd_set fdset_s;
 #endif
 
+	struct ip_address_s
+	{
+		u_short port;
+		uint8_t address[INET6_ADDRSTRLEN];
+		size_t addr_size;
+		net::settings::aifamily type;
+	};
+
+	struct sockaddr_storage
+	{
+		net::ip_address_s ip_address;
+		net::socket_t socket;
+	};
+
 
 #if defined(_WIN32) && !defined(linux)
+	// TODO: make sockets asynchronous
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
 	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port);
+	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
 #elif defined(linux) && !defined(_WIN32)
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param);
+	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port, net::socket::type sock_param);
 
 	[[deprecated]]
 	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port);
+
+	[[deprecated]]
 	int32_t  wait_async_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
 #endif
 	int32_t  wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections);
-
-	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
 	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port);
 
 #if defined(linux) && !defined(_WIN32)	
