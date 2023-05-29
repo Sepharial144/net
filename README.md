@@ -1,12 +1,12 @@
 # Net version 0.0.1
-Net is crossplatform library for network programming.
-The library contain sockets for Win32 and Linux.
+Net is a crossplatform library for network programming.
+The library contain socket api for Win32 and Linux.
 
 ## Table of Contents
 1. [Features](#features)
 2. [Installation dependencies](#installation-dependencies)
 3. [Build](#build-library)
-4. [Linux examples](#linux-examples)
+4. [Examples](#examples)
 5. [Windows examples](#windows-examples)
 
 ## Features
@@ -25,7 +25,7 @@ Net library use google test, if you want check api or unit testing follow steps
 apt-get install libgtest-dev
 ```
 #### Windows
-Install vcpkg package manager to use google test as global dependency by https://vcpkg.io/en/getting-started.html
+Install vcpkg package manager to install google test globaly by https://vcpkg.io/en/getting-started.html
 
 ```sh
 vcpkg install gtest
@@ -47,11 +47,8 @@ Use on of the cmake option to enable feature
 | Examples | -BNET_EXAMPLES=ON |
 
 ## Examples
-### Linux
-```sh
-some code examples
-```
-### Windows
-```sh
-some code examples
-```
+Actual examples contain in examples folder
+
+
+## Net API
+Some information about using library
