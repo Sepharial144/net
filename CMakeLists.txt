@@ -65,18 +65,22 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${NET_INCLUDE_DIR})
 
 message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
-add_subdirectory(tests)
-
-if(WIN32)
-    add_subdirectory("examples/client")
-    add_subdirectory("examples/server")
-    add_subdirectory("examples/${TARGET_OS}/async_tcp_client")
+if(NET_TESTS)
+    add_subdirectory(tests)
 endif()
 
-if(UNIX)
-    add_subdirectory("examples/${TARGET_OS}/tcp/block/server")
-    add_subdirectory("examples/${TARGET_OS}/tcp/block/client")
-    add_subdirectory("examples/${TARGET_OS}/tcp/nonblock/server")
+if (NET_EXAMPLES)
+    if(WIN32)
+        add_subdirectory("examples/client")
+        add_subdirectory("examples/server")
+        add_subdirectory("examples/${TARGET_OS}/async_tcp_client")
+    endif()
+
+    if(UNIX)
+        add_subdirectory("examples/${TARGET_OS}/tcp/block/server")
+        add_subdirectory("examples/${TARGET_OS}/tcp/block/client")
+        add_subdirectory("examples/${TARGET_OS}/tcp/nonblock/server")
+    endif()
 endif()
 
 # TODO: finish configure project

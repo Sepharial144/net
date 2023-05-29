@@ -19,14 +19,16 @@ The library contain socket api for Win32 and Linux.
 | Shared library | yes | no |
 
 ## Installation dependencies
-Net library use google test, if you want check api or unit testing follow steps
+Net library use google test, if you want check coverage api or unit tests follow steps
+
 #### Linux
 ```sh
 apt-get install libgtest-dev
 ```
-#### Windows
-Install vcpkg package manager to install google test globaly by https://vcpkg.io/en/getting-started.html
 
+#### Windows
+Make sure you have installed Visual Studio 17 or higher
+Install vcpkg package manager to install google test globaly by https://vcpkg.io/en/getting-started.html
 ```sh
 vcpkg install gtest
 ```
@@ -36,15 +38,16 @@ Note: if you have some problems to execute vcpkg on command line add it to PATH 
 ```sh
 git clone https://github.com/Sepharial144/net.git
 cd net
-cmake . -Bbuild
-cmake --build build --config Release  # or Debug
+cmake . -Bbuild [net_lib_build_options]
+cmake --build build --config Release -j # or --config Debug
 ```
+
 ### Build options
 Use on of the cmake option to enable feature
-| Feature | Option |
-| ------ | ------ |
-| Testing  | -BNET_TESTING=ON |
-| Examples | -BNET_EXAMPLES=ON |
+| Feature | Option | Default Value |
+| ------ | ------ | ------ |
+| Testing  | -DNET_TESTING=ON | Off |
+| Examples | -DNET_EXAMPLES=ON | Off |
 
 ## Examples
 Actual examples contain in examples folder
