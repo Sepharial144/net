@@ -1,2 +1,2 @@
 cmake . -Bbuild 
-cmake --build build --config Realease -j4
+cmake --build build --config Realease -j
