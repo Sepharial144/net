@@ -16,7 +16,7 @@ The library contain socket api for Win32 and Linux.
 | Synchronous sockets  | yes | yes |
 | Header only | no | no |
 | Static library | yes | no |
-| Shared library | yes | no |
+| Shared library | no | no |
 
 ## Installation dependencies
 Net library use google test, if you want check coverage api or unit tests follow steps
