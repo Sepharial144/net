@@ -25,12 +25,12 @@ int main(int argc, char* argv[])
         std::array<char, 1024ul> request = { 0 };
         net::pollfd_s fdArray = {0};
         fdArray.fd = tcp_connection;
-        fdarray.events = POLLWRNORM;
+        fdArray.events = POLLWRNORM;
 
         std::string message{ "Super Message!" };
-        constexpr uint64_t timeout = DEFAULT_WAIT;
+        constexpr int64_t timeout = NET_DEFAULT_WAIT;
 
-        if(int32_t ret = net::poll(fdArray, 1, timeout))
+        if(int32_t ret = net::poll(&fdArray, 1, timeout))
         {
             std::cout << "Connection established ... " << argv[1] << ":" <<argv[2] << &std::endl;
             std::cout << "send data ... " << argv[1] << ":" <<argv[2] << std::endl;
@@ -45,8 +45,8 @@ int main(int argc, char* argv[])
         bool serverIsRun = true;
         while(serverIsRun)
         {
-            int32_t ret = net::poll(fdArray, 1, timeout);
-            if(ret != SOCKET)
+            int32_t ret = net::poll(&fdArray, 1, timeout);
+            if(ret != SOCKET_ERROR)
             {
                 std::cout << "read ... " << &std::endl;
                 ret = net::read(tcp_connection, request.data(), request.size());
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
                 std::cout << "read ... error ... " << ret << &std::endl;
             }
 
-            if(int32_t ret = net::poll(fdArray, 1, timeout))
+            if(int32_t ret = net::poll(&fdArray, 1, timeout))
             {
                 std::cout << "write ... " << &std::endl;
                 ret = net::write(tcp_connection, request.data(), request.size());

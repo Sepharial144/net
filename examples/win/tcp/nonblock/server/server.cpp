@@ -38,7 +38,7 @@ int main()
 
         serverSocketArray[0].fd = tcp_server;
         serverSocketArray[0].events = POLLWRDNORM;
-        constexpr uint64_t timeout = DEFAULT_WAIT; // wait 3 minute
+        constexpr int64_t timeout = NET_DEFAULT_WAIT; // wait 3 minute
         int32_t ret = net::poll(serverSocketArray, 1, timeout);
         net::throw_exception_on(ret == SOCKET_ERROR, "Server poll error");
         if (ret == SOCKET_ERROR)
