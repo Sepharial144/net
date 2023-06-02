@@ -74,6 +74,8 @@ if (NET_EXAMPLES)
         add_subdirectory("examples/client")
         add_subdirectory("examples/server")
         #add_subdirectory("examples/${TARGET_OS}/async_tcp_client")
+        add_subdirectory("examples/${TARGET_OS}/tcp/nonblock/client")
+        add_subdirectory("examples/${TARGET_OS}/tcp/nonblock/server")
     endif()
 
     if(UNIX)
