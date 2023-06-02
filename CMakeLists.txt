@@ -73,7 +73,7 @@ if (NET_EXAMPLES)
     if(WIN32)
         add_subdirectory("examples/client")
         add_subdirectory("examples/server")
-        add_subdirectory("examples/${TARGET_OS}/async_tcp_client")
+        #add_subdirectory("examples/${TARGET_OS}/async_tcp_client")
     endif()
 
     if(UNIX)

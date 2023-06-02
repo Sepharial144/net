@@ -10,9 +10,9 @@ namespace net
 
         void initializeWSA(WSADATA& wsa);
         void releaseAddrinfo(::addrinfo* p_sockaddr);
-        //void interpretFamilyAddress(sockaddr_storage& addressStorage, 
-        //                            net::ipAddress& address, 
-        //                            net::settings::aifamily family);
+        void interpretFamilyAddress(sockaddr_storage& addressStorage, 
+                                    net::ip_address_s& address, 
+                                    net::settings::aifamily family);
   
     } // !namespace api
 } // !namespace net

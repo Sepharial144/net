@@ -20,15 +20,14 @@ namespace net
 			p_sockaddr = nullptr;
 		}
 
-/*
-		void interpretFamilyAddress(sockaddr_storage& addressStorage, net::ipAddress& address, net::settings::aifamily family)
+		void interpretFamilyAddress(sockaddr_storage& addressStorage, net::ip_address_s& address, net::settings::aifamily family)
 		{
 			if (family == net::settings::inetv4)
 			{
 				sockaddr_in* ptrIpv4ClientAddr = reinterpret_cast<sockaddr_in*>(&addressStorage);
 				address.addr_size = static_cast<size_t>(INET_ADDRSTRLEN);
 				address.port = ::ntohs(ptrIpv4ClientAddr->sin_port);
-				::inet_ntop(net::settings::inetv4, ptrIpv4ClientAddr, reinterpret_cast<PSTR>(address.address), address.addr_size);
+				::inet_ntop(net::settings::inetv4, ptrIpv4ClientAddr, reinterpret_cast<PSTR>(&address.address), address.addr_size);
 				return;
 			}
 			if (family == net::settings::inetv6)
@@ -36,11 +35,10 @@ namespace net
 				sockaddr_in6* ptrIpv6ClientAddr = reinterpret_cast<sockaddr_in6*>(&addressStorage);
 				address.addr_size = static_cast<size_t>(INET6_ADDRSTRLEN);
 				address.port = ::ntohs(ptrIpv6ClientAddr->sin6_port);
-				::inet_ntop(net::settings::inetv6, ptrIpv6ClientAddr, reinterpret_cast<PSTR>(address.address), address.addr_size);
+				::inet_ntop(net::settings::inetv6, ptrIpv6ClientAddr, reinterpret_cast<PSTR>(&address.address), address.addr_size);
 				return;
 			}
 			throw std::runtime_error("Netlib: could not recognize address family");
 		}
-*/
 	} // namespace api
 } // namespace net

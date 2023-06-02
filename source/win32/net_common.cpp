@@ -23,16 +23,16 @@ namespace net
 		net::throw_exception_on(sockServer == INVALID_SOCKET, "Netlib: server create socket failed");
 
 		constexpr int32_t on = 1;
-		ret = ::setsockopt(ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on sizeof(on));
+		int32_t ret = ::setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
 		net::throw_exception_on(ret != SOCKET_ERROR, "Netlib: Netlib: asynchronous server set socket option failed");
 
 		if (sock_param == net::socket::type::nonblocking)
 		{
-			ret = ::ioctlsocket(sockConnection, FIONBIO, &sock_param);
+			ret = ::ioctlsocket(sockServer, FIONBIO, (u_long*)&sock_param);
 			net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: asynchronous server ioctl call failed");
 		}
 
-		int32_t ret = ::bind(sockServer, (sockaddr*)&sockAddress, sizeof(sockaddr));
+		ret = ::bind(sockServer, (sockaddr*)&sockAddress, sizeof(sockaddr));
 		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server bind failed");
 
 		ret = ::listen(sockServer, setting.countConnection);
@@ -74,12 +74,12 @@ namespace net
 		}
 
 		constexpr int32_t on = 1;
-		ret = ::setsockopt(ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on sizeof(on));
+		ret = ::setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
 		net::throw_exception_on(ret != SOCKET_ERROR, "Netlib: Netlib: asynchronous server set socket option failed");
 
 		if (sock_param == net::socket::type::nonblocking)
 		{
-			ret = ::ioctlsocket(sockConnection, FIONBIO, &sock_param);
+			ret = ::ioctlsocket(sockServer, FIONBIO, (u_long*)&sock_param);
 			net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: asynchronous server ioctl call failed");
 		}
 
@@ -152,13 +152,12 @@ namespace net
 		}
 
 		constexpr int32_t on = 1;
-		int32_t ret = ::setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
-		if (setsockopt(ListenSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&bOptVal, bOptLen) != SOCKET_ERROR)
+		ret = ::setsockopt(sockConnection, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
 		net::throw_exception_on(ret < 0, "Netlib: asynchronous connection set socket option failed");
 
 		if (sock_param == net::socket::type::nonblocking)
 		{
-			ret = ::ioctlsocket(sockConnection, FIONBIO, &sock_param);
+			ret = ::ioctlsocket(sockConnection, FIONBIO, (u_long*)&sock_param);
 			net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: asynchronous connection ioctl call failed");
 		}
 
@@ -238,6 +237,7 @@ namespace net
         return sockConnection;
 	}
 
+/*
 	int64_t  poll_read(pollfd_t& poll_array, uint64_t socket_fd, int64_t timeout)
 	{
 		poll_array.events = POLLRDNORM;
@@ -249,6 +249,7 @@ namespace net
 		poll_array.events = POLLWRNORM;
 		return ::WSAPoll(&poll_array, socket_fd, timeout);
 	}
+*/
 
 	void shutdown(net::socket_t& socket, net::enumShutdown param)
 	{
@@ -314,23 +315,6 @@ namespace net
 		ip_addr.type = (ip_addr.addr_size == INET6_ADDRSTRLEN)? net::settings::aifamily::inetv6 : net::settings::aifamily::inetv4;
 		ip_addr.port = ::htons(sockAddress.sin_port);
 		*/
-		if (ip_addr.type == net::settings::inetv4)
-		{
-			sockaddr_in* ptrIpv4ClientAddr = reinterpret_cast<sockaddr_in*>(&addressStorage);
-			ip_addr.addr_size = static_cast<size_t>(INET_ADDRSTRLEN);
-			ip_addr.port = ::ntohs(ptrIpv4ClientAddr->sin_port);
-			::inet_ntop(net::settings::inetv4, ptrIpv4ClientAddr, reinterpret_cast<PSTR>(ip_addr.address), ip_addr.addr_size);
-			return;
-		}
-		if (ip_addr.type == net::settings::inetv6)
-		{
-			sockaddr_in6* ptrIpv6ClientAddr = reinterpret_cast<sockaddr_in6*>(&addressStorage);
-			ip_addr..addr_size = static_cast<size_t>(INET6_ADDRSTRLEN);
-			ip_addr..port = ::ntohs(ptrIpv6ClientAddr->sin6_port);
-			::inet_ntop(net::settings::inetv6, ptrIpv6ClientAddr, reinterpret_cast<PSTR>(ip_addr.address), ip_addr..addr_size);
-			return;
-		}
-		throw std::runtime_error("Netlib: could not recognize address family");
 	}
 
 	bool is_connected(socket_t& sockfd)
