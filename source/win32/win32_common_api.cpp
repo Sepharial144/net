@@ -20,6 +20,7 @@ namespace net
 			p_sockaddr = nullptr;
 		}
 
+/*
 		void interpretFamilyAddress(sockaddr_storage& addressStorage, net::ipAddress& address, net::settings::aifamily family)
 		{
 			if (family == net::settings::inetv4)
@@ -40,5 +41,6 @@ namespace net
 			}
 			throw std::runtime_error("Netlib: could not recognize address family");
 		}
+*/
 	} // namespace api
 } // namespace net
