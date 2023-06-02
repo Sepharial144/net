@@ -46,8 +46,8 @@ namespace net {
 		};
 	} // namespace socket
 
-
-#if defined(linux) && !defined(_WIN32)
+//TODO: adapt to win32 calls
+//#if defined(linux) && !defined(_WIN32)
 	namespace pollc {
 
 		enum param: int16_t
@@ -72,16 +72,17 @@ namespace net {
 		enum timeout: int16_t
 		{
 			immediately = 0,
-			forever = -1
+			forever = -1,
+			default = NET_DEFAULT_WAIT
 		};
 
 		enum poll_ret: int16_t
 		{
-			poll_timeout = 0,
-			poll_error = -1
+			poll_timeout = NET_POLL_TIMEOUT,
+			poll_error = NET_POLLERR
 		} ;
 	} //namespace pollc
-#endif
+//#endif
 
 	enum enumShutdown : int16_t
 	{
