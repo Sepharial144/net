@@ -1,4 +1,5 @@
 #include "net.hpp"
+#include "exceptions/net_exception.hpp"
 
 #include <iostream>
 #include <array>
@@ -37,7 +38,7 @@ int main()
         std::cout << "Poll call ..." << &std::endl;
 
         serverSocketArray[0].fd = tcp_server;
-        serverSocketArray[0].events = POLLWRDNORM;
+        serverSocketArray[0].events = POLLWRNORM;
         constexpr int64_t timeout = NET_DEFAULT_WAIT; // wait 3 minute
         int32_t ret = net::poll(serverSocketArray, 1, timeout);
         net::throw_exception_on(ret == SOCKET_ERROR, "Server poll error");
@@ -54,7 +55,7 @@ int main()
 
         if (retEvents != POLLRDNORM)
         {
-            throw net::exception("Server revent error")
+            throw net::exception("Server revent error");
         }
 
         std::cout << "Accept connection ..." << std::endl;
