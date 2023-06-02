@@ -4,7 +4,7 @@
 
 namespace net
 {
-	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port)
+	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -22,6 +22,16 @@ namespace net
 		socket_t sockServer = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
 		net::throw_exception_on(sockServer == INVALID_SOCKET, "Netlib: server create socket failed");
 
+		constexpr int32_t on = 1;
+		ret = ::setsockopt(ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on sizeof(on));
+		net::throw_exception_on(ret != SOCKET_ERROR, "Netlib: Netlib: asynchronous server set socket option failed");
+
+		if (sock_param == net::socket::type::nonblocking)
+		{
+			ret = ::ioctlsocket(sockConnection, FIONBIO, &sock_param);
+			net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: asynchronous server ioctl call failed");
+		}
+
 		int32_t ret = ::bind(sockServer, (sockaddr*)&sockAddress, sizeof(sockaddr));
 		net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: server bind failed");
 
@@ -32,7 +42,7 @@ namespace net
 		return sockServer;
 	}
 
-	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port)
+	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port, net::socket::type sock_param)
 	{
 		std::cout << "Server initializing ..." << &std::endl;
 
@@ -61,6 +71,16 @@ namespace net
 			::freeaddrinfo(pAddrInfo);
 			::WSACleanup();
 			throw net::exception("Netlib: server create socket failed");
+		}
+
+		constexpr int32_t on = 1;
+		ret = ::setsockopt(ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on sizeof(on));
+		net::throw_exception_on(ret != SOCKET_ERROR, "Netlib: Netlib: asynchronous server set socket option failed");
+
+		if (sock_param == net::socket::type::nonblocking)
+		{
+			ret = ::ioctlsocket(sockConnection, FIONBIO, &sock_param);
+			net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: asynchronous server ioctl call failed");
 		}
 
 		ret = ::bind(sockServer, pAddrInfo->ai_addr, pAddrInfo->ai_addrlen);
@@ -100,7 +120,7 @@ namespace net
 	}
 
 	//TODO: fix int port to char
-	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port)
+	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port, net::socket::type sock_param)
 	{
 		std::cout << "Connection initialization ..." << &std::endl;
 
@@ -115,7 +135,6 @@ namespace net
 		hints.ai_socktype = setting.aiSocktype;
 		hints.ai_protocol = setting.aiProtocol;
 
-		// TODO: check getaddrinfo is correct
 		std::cout << "Connection: get addrinfo ..." << &std::endl;
 		int32_t ret = ::getaddrinfo(nullptr, port, &hints, &sockAddress);
 		net::throw_exception_on(ret != 0, "Netlib: connection getaddrinfo failed");
@@ -131,6 +150,18 @@ namespace net
 			api::releaseAddrinfo(sockAddress);
 			throw net::exception("Netlib: connection create socket failed");
 		}
+
+		constexpr int32_t on = 1;
+		int32_t ret = ::setsockopt(sockServer, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
+		if (setsockopt(ListenSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&bOptVal, bOptLen) != SOCKET_ERROR)
+		net::throw_exception_on(ret < 0, "Netlib: asynchronous connection set socket option failed");
+
+		if (sock_param == net::socket::type::nonblocking)
+		{
+			ret = ::ioctlsocket(sockConnection, FIONBIO, &sock_param);
+			net::throw_exception_on(ret == SOCKET_ERROR, "Netlib: asynchronous connection ioctl call failed");
+		}
+
 		std::cout << "Connection: create socket ... complete" << &std::endl;
 
 		// TODO: create non-bloking sockets
@@ -143,7 +174,7 @@ namespace net
 			throw net::exception("Netlib: connection failed");
 		}
 
-		//::freeaddrinfo(sockAddress);
+		api::releaseAddrinfo(sockAddress);
 		std::cout << "Connection: connect to host ... complete" << &std::endl;
 
 		return sockConnection;
@@ -256,6 +287,46 @@ namespace net
 			net::throw_exception_on(ret != SOCKET_ERROR, "Netlib: close failed");
 		}
 		std::cout << "Close socket ... complete" << &std::endl;
+	}
+
+	int32_t poll(net::pollfd_s* pollfd_array, uint64_t array_len, int64_t timeout)
+	{
+		return ::WSAPoll(pollfd_array, array_len, timeout);
+	}
+
+	void interpret_address(socket_t& sockfd, ip_address_s& ip_addr)
+	{
+		/*
+		struct sockaddr_storage sockAddress = {0};
+		size_t szAddress = sizeof(sockAddress);
+		if(ip_addr.type == net::settings::aifamily::inetv4)
+			::inet::ntop(AF_INET, )  ip_addr.address
+
+		if(ip_addr.type == net::settings::aifamily::inetv6)
+		ip_addr.address  (ip_addr.type == net::settings::aifamily::inetv4)
+
+		
+		//int32_t ret =  ::getpeername(sockfd, (struct sockaddr*)(&sockAddress), (socklen_t*)(&szAddress));
+		net::throw_exception_on(ret == -1, "Netlib: interpret address failed");
+
+		ip_addr.address = ::inet_ntoa(sockAddress.sin_addr);
+		ip_addr.addr_size = std::strlen(ip_addr.address);
+		ip_addr.type = (ip_addr.addr_size == INET6_ADDRSTRLEN)? net::settings::aifamily::inetv6 : net::settings::aifamily::inetv4;
+		ip_addr.port = ::htons(sockAddress.sin_port);
+		*/
+	}
+
+	bool is_connected(socket_t& sockfd)
+	{
+		/*
+		struct sockaddr_in sockAddress = {0};
+		size_t szAddress = sizeof(sockAddress);
+		int32_t ret = ::getpeername(sockfd, (struct sockaddr*)(&sockAddress), (socklen_t*)(&szAddress));
+		if (ret != -1)
+			return true;
+		*/
+		return false;
+		
 	}
 
 	void release()

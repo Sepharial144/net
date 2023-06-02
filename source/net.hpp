@@ -21,6 +21,8 @@
 
 #if defined(_WIN32) && !defined(linux)
 	#define NET_SOCKET_ERROR SOCKET_ERROR
+	#define NET_SOCKET_EAGAIN_EXPR WSAGetLastError() == EAGAIN
+	#define NET_SOCKET_WBLOCK_EXPR WSAGetLastError() == WSAEWOULDBLOCK
 #elif defined(linux) && !defined(_WIN32)
 	#define NET_SOCKET_ERROR -1
 	#define NET_SOCKET_EAGAIN_EXPR errno == EAGAIN
@@ -42,8 +44,6 @@ namespace net {
 			blocking = 0,
 			nonblocking = 1
 		};
-
-
 	} // namespace socket
 
 
@@ -197,12 +197,12 @@ namespace net {
 
 #if defined(_WIN32) && !defined(linux)
 	// TODO: make sockets asynchronous
-	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port);
-	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port);
-	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port);
+	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param);
+	socket_t make_server(net::settings::server_t& setting, const char* address, const char* port, net::socket::type sock_param);
+	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port, net::socket::type sock_param);
 #elif defined(linux) && !defined(_WIN32)
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param);
-	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port, net::socket::type sock_param);
+	socket_t make_connection(net::settings::connection_t& setting, const char* address, const char* port, net::socket::type sock_param);
 
 	[[deprecated]]
 	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port);
@@ -218,6 +218,9 @@ namespace net {
 	int32_t poll(net::pollfd_s* pollfd_array, uint64_t array_len, int64_t timeout);
 	void interpret_address(socket_t& sockfd, ip_address_s& ip_addr);
 	bool is_connected(socket_t& sockfd);
+#elif defined(_WIN32) && !defined(linux)
+	int32_t poll(net::pollfd_s* pollfd_array, uint64_t array_len, int64_t timeout);
+	void interpret_address(socket_t& sockfd, ip_address_s& ip_addr);
 #endif
 
 	int32_t  read(net::socket_t& socket, char* data, size_t len);
