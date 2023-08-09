@@ -91,7 +91,7 @@ namespace net
 	}
 
 	TEST(NetStandartExceptionTest, CatchExceptionOnPollZero) {
-		const std::string expected = "Test unexpected poll error, code: 0";
+		const std::string expected = "Test poll timeout error, code: 0";
 		try {
 			int32_t ret = 0;
 			net::throw_exception_on_poll(ret, "Test");
