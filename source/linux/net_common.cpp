@@ -155,24 +155,6 @@ namespace net {
 			net::throw_exception_on(ret < 0, "Netlib: connection failed");
 		}
 
-/*
-		if (sock_param == net::socket::type::blocking)
-		{
-			ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
-        	net::throw_exception_on(ret < 0, "Netlib: connection failed");
-			if (ret < 0 && errno != EINPROGRESS)
-				throw net::exception("Netlib: connection failed");
-		} else {
-			do
-			{
-			ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
-			net::throw_exception_on(ret < 0, "Netlib: connection failed");
-			if (ret < 0 && errno == EALREADY)
-				throw net::exception("Netlib: connection failed");
-			} while (ret < 0 && errno == EINPROGRESS);
-		}
-*/
-
         std::cout << "Connection initialization ... complete" << &std::endl;
         return sockConnection;
 	}
