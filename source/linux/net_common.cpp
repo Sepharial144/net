@@ -133,14 +133,14 @@ namespace net {
 		int32_t ret = ::setsockopt(sockConnection, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(on));
 		net::throw_exception_on(ret < 0, "Netlib: connection set socket option failed");
 
-		struct hostent *hostInfo = gethostbyname(address);
+		struct hostent *hostInfo = ::gethostbyname(address);
 		if (hostInfo == nullptr)
 			throw net::exception("Netlib: error while resolve address name");
 
         struct sockaddr_in addr = { 0 };
         addr.sin_family = setting.aiFamily;
 		addr.sin_port = ::htons(net::api::translatePort<int32_t>(port));
-        addr.sin_addr.s_addr = ::inet_addr(inet_ntoa(*(struct in_addr*)hostInfo->h_addr));
+        addr.sin_addr.s_addr = ::inet_addr(::inet_ntoa(*(struct in_addr*)hostInfo->h_addr_list[0]));
 
 		if (sock_param == net::socket::type::nonblocking)
 		{
