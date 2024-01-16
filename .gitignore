@@ -17,6 +17,9 @@ bld/
 [Ll]ogs/
 
 # Ignore visual studio code files
+*.txt
+
+# Ignore visual studio code files
 *.vs
 
 # Prerequisites

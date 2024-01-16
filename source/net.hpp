@@ -42,8 +42,6 @@ namespace net {
 			blocking = 0,
 			nonblocking = 1
 		};
-
-
 	} // namespace socket
 
 
@@ -203,6 +201,11 @@ namespace net {
 #elif defined(linux) && !defined(_WIN32)
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param);
 	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port, net::socket::type sock_param);
+	
+	namespace socket
+	{
+		bool not_ready();
+	} // namespace socket
 
 	[[deprecated]]
 	socket_t make_async_server(net::settings::server_t& setting, const char* address, int32_t port);

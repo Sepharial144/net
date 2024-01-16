@@ -163,6 +163,11 @@ namespace net {
         return sockConnection;
 	}
 
+	namespace socket
+	{
+		bool not_ready() { return NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR; } 
+	} // namespace socket
+
     int32_t read(net::socket_t& socket, char* data, size_t len)
 	{
 		return ::recv(socket, data, len, 0);

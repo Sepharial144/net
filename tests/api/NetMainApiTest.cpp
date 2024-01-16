@@ -328,7 +328,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 
 							if (ret < 0)
 							{
-								if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+								if (net::socket::not_ready())
 									continue;
 
 								if(errno != EWOULDBLOCK)
@@ -361,7 +361,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronous)
 
 						if (ret < 0)
 						{
-							if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+							if (net::socket::not_ready())
 								continue;
 
 							std::cout << "Write message ...  error: " << ret << " errno: " << errno <<&std::endl;
@@ -518,7 +518,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 
 							if (ret < 0)
 							{
-								if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+								if (net::socket::not_ready())
 								{
 									std::cout << "Server read message ... not ready" << &std::endl;
 									continue;
@@ -550,7 +550,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 
 						if (ret < 0)
 						{
-							if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+							if (net::socket::not_ready())
 							{
 								std::cout << "Server write messag ... not ready" << &std::endl;
 								continue;
@@ -619,7 +619,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 
 					if (ret < 0)
 					{
-						if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+						if (net::socket::not_ready())
 						{
 							std::cout << "Connection write message ... not ready" << &std::endl;
 							continue;
@@ -655,7 +655,7 @@ TEST_F(TCPTest, TCPCommunicationAsynchronousBoth)
 
 				if (ret < 0)
 				{
-					if (NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR)
+					if (net::socket::not_ready())
 					{
 						std::cout << "Connection read message ... not ready" << &std::endl;
 						continue;
