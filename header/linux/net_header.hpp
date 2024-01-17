@@ -299,8 +299,6 @@ namespace net {
 
 	socket_t make_server(net::settings::server_t& setting, const char* address, int32_t port, net::socket::type sock_param)
 	{
-		std::cout << "Server initializing ..." << &std::endl;
-
 		if (port < static_cast<int32_t>(0))
 			throw std::logic_error("Netlib: server port should not be negative");
 
@@ -329,15 +327,11 @@ namespace net {
 	    ret = ::listen(sockServer, 1);
         net::throw_exception_on(ret < 0, "Netlib: server listening failed");
 
-        std::cout << "Server initializing ... complete" << &std::endl;
-
         return sockServer;
 	}
 
 	socket_t make_connection(settings::connection_t& setting, const char* address, const char* port, net::socket::type sock_param)
 	{
-		std::cout << "Connection initialization ..." << &std::endl;
-
         socket_t sockConnection = ::socket(setting.aiFamily, setting.aiSocktype, setting.aiProtocol);
 
 		constexpr int32_t on = 1;
@@ -361,54 +355,43 @@ namespace net {
 			do{
 				std::this_thread::sleep_for(std::chrono::microseconds(37));
 				ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
-				std::cout << "Connection async status: " << ret << " errno: " << errno << &std::endl;
 			} while(ret != 0);	
-			std::cout << "Connection async status ready: " << ret << " errno: " << errno << &std::endl; 
 		} else 
 		{
 			ret = ::connect(sockConnection, (struct sockaddr*)&addr, sizeof(addr));
 			net::throw_exception_on(ret < 0, "Netlib: connection failed");
 		}
 
-        std::cout << "Connection initialization ... complete" << &std::endl;
         return sockConnection;
 	}
 
 	int32_t  wait_connection(net::socket_t& sock_server, socket_t& sock_client, int32_t connections)
 	{
-		std::cout << "Server wait connection ... " << &std::endl;
         net::throw_exception_on(sock_client > 0, "Netlib: provided client is not closed");
 
 		do
 		{
 			sock_client = ::accept(sock_server, nullptr, nullptr);
 		} while(sock_client < 0 && (errno == EAGAIN || errno == EWOULDBLOCK));
-		if (sock_client < 0)
-		{
-			std::cout << "Asynchronous server client socket got accept error" << &std::endl;
-			return 0;
-		}
 
-		std::cout << "Server got connection socket id ... " << sock_client << &std::endl;
+		if (sock_client < 0)
+			return 0;
+
 		return 1;
 	}
 
 	socket_t make_async_connection(settings::connection_t& setting, const char* address, const char* port)
 	{
-		std::cout << "Asynchronous server wait connection ... " << &std::endl;
         net::throw_exception_on(sock_client > 0, "Netlib: provided client is not closed");
 		
 		do
 		{
 			sock_client = ::accept(sock_server, nullptr, nullptr);
 		} while(sock_client < 0 && (errno == EAGAIN || errno == EWOULDBLOCK));
-		if (sock_client < 0)
-		{
-			std::cout << "Asynchronous server client socket got accept error" << &std::endl;
-			return 0;
-		}
 
-		std::cout << "Asynchronous serverr got connection socket id ... " << sock_client << &std::endl;
+		if (sock_client < 0)
+			return 0;
+
 		return 1;
 	}
 
@@ -463,23 +446,17 @@ namespace net {
 
 	void shutdown(net::socket_t& socket, net::enumShutdown param)
 	{
-		// TODO: check different calls 
-		std::cout << "shutdown socket ... " << &std::endl;
 		int32_t ret = ::shutdown(socket, static_cast<int>(param));
 		net::throw_exception_on(ret < 0, "Netlib: client shutdown socket failed");
-		std::cout << "shutdown socket ... complete" << &std::endl;
 	}
 
 	void free(net::socket_t& socket)
 	{
-		std::cout << "Close socket ..." << &std::endl;
 		if (socket != 0)
 		{
-			std::cout << "Close socket try ... " << &std::endl;
 			int32_t ret = ::close(socket);
 			net::throw_exception_on(ret < 0, "Netlib: close failed");
 		}
-		std::cout << "Close socket ... complete" << &std::endl;
 	}
 
 } // !namespace net

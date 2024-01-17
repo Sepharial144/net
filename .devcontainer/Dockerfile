@@ -1,8 +1,14 @@
 FROM alpine:3.19
-RUN apk add --no-cache \
+
+RUN apk update \
+  && apk upgrade \
+  && apk add --no-cache \
     bash \
+    clang \
+    clang-dev \
+    alpine-sdk \
     cmake \
-    make \
-    git \
-    g++ \
-    gtest-dev
+    ninja \
+    ccache \
+    gtest-dev \
+    python3

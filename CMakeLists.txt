@@ -1,8 +1,12 @@
 ﻿cmake_minimum_required (VERSION 3.20)
 
-project(net VERSION 0.0.1 LANGUAGES CXX)
+project(net VERSION 0.0.1 DESCRIPTION "net library" LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(config.cmake)
 
 file(GLOB_RECURSE HDR_FILES "source/*.hpp")
 file(GLOB_RECURSE SRC_FILES "source/*.cpp")
