@@ -412,6 +412,11 @@ namespace net {
 		return 1;
 	}
 
+	namespace socket
+	{
+		bool not_ready() { return NET_SOCKET_EAGAIN_EXPR  || NET_SOCKET_WBLOCK_EXPR; } 
+	} // namespace socket
+
 	void set_pollfd(net::pollfd_s pollfd_array[], uint64_t array_len, net::pollc::param param)
 	{
 		for(size_t i = 0ul; 0 < array_len; ++i)
