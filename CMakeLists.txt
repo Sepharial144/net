@@ -45,6 +45,12 @@ elseif(UNIX)
         "${CMAKE_CURRENT_SOURCE_DIR}/source" 
         "${CMAKE_CURRENT_SOURCE_DIR}/source/linux"
     )
+
+    set(HDR_PUBLIC 
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/net.hpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/net_api.hpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/linux_definitions.hpp"
+    )
 endif()
 
 set(SOURCE_DEPENDENCIES ${HDR_FILES} ${SRC_FILES})
@@ -57,15 +63,17 @@ endif()
 
 set(LIB_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
 
-add_library(${PROJECT_NAME} STATIC ${SOURCE_DEPENDENCIES})
+set(LIBRARY_NAME ${PROJECT_NAME}xx)
 
-set_target_properties(${PROJECT_NAME} 
+add_library(${LIBRARY_NAME} STATIC ${SOURCE_DEPENDENCIES})
+
+set_target_properties(${LIBRARY_NAME} 
     PROPERTIES 
-    PUBLIC_HEADER "${HDR_FILES}")
+    PUBLIC_HEADER ${HDR_PUBLIC})
 
-target_link_libraries(${PROJECT_NAME} ${LIB_DEPENDENCIES})
+target_link_libraries(${LIBRARY_NAME} ${LIB_DEPENDENCIES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${NET_INCLUDE_DIR})
+target_include_directories(${LIBRARY_NAME} PRIVATE ${NET_INCLUDE_DIR})
 
 message(STATUS "INSTALL PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
@@ -91,13 +99,13 @@ endif()
 # fix execution install folder, does not work
 message(STATUS "Build path: ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${LIBRARY_NAME}
         CONFIGURATIONS Debug
-        ARCHIVE DESTINATION "debug/net/lib"
-        RUNTIME DESTINATION "debug/net/bin"
-        PUBLIC_HEADER DESTINATION "debug/net")
-install(TARGETS ${PROJECT_NAME}
+        ARCHIVE DESTINATION "debug/${LIBRARY_NAME}/lib"
+        RUNTIME DESTINATION "debug/${LIBRARY_NAME}/bin"
+        PUBLIC_HEADER DESTINATION "debug/${LIBRARY_NAME}")
+install(TARGETS ${LIBRARY_NAME}
         CONFIGURATIONS Release
-        ARCHIVE DESTINATION "release/net/lib"
-        RUNTIME DESTINATION "release/net/bin"
-        PUBLIC_HEADER DESTINATION "release/net")
+        ARCHIVE DESTINATION "release/${LIBRARY_NAME}/lib"
+        RUNTIME DESTINATION "release/${LIBRARY_NAME}/bin"
+        PUBLIC_HEADER DESTINATION "release/${LIBRARY_NAME}")
